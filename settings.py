@@ -15,8 +15,10 @@ config = configparser.SafeConfigParser(allow_no_value=True)
 config.read('%s/production.cfg' % (BASE_DIR))
 
 # config directory
-WORKING_DIR = config.get('general', 'WORKING_DIR')  # base directory for downloading and processing data
-OUTPUT_DIR = config.get('general', 'OUTPUT_DIR') # base directory for the data products
+# base directory for downloading and processing data
+WORKING_DIR = os.path.expanduser(config.get('general', 'WORKING_DIR'))
+# base directory for the data products  
+OUTPUT_DIR = os.path.expanduser(config.get('general', 'OUTPUT_DIR')) 
 
 # watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')

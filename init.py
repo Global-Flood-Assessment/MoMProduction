@@ -10,7 +10,20 @@ from zipfile import ZipFile
 
 from settings import *
 
-# check ftp user/password
+def create_dir(apath):
+    '''create dir with a path'''
+    if not os.path.exists(apath):
+        print("crate " + apath)
+        os.makedirs(apath, exist_ok=True)
+
+print("task: check folder stucture")
+create_dir(WORKING_DIR)
+
+# task: create the folders
+for key in config['processing']:
+    print(key)
+
+# task: check ftp user/password
 user = config.get("glofas", "user")
 passwd = config.get('glofas', "passwd")
 
@@ -21,7 +34,7 @@ if ('?' in user or '?' in passwd):
 else:
     print('Task: check user/passwd')
 
-# check if shp file is unzipped
+# task: check if shp file is unzipped
 if not os.path.exists(WATERSHED_SHP):
     print("Task: unzip watershed.shp.zip")
     with ZipFile(WATERSHED_SHP + '.zip' ,'r') as zipObj:
