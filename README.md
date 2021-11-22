@@ -21,7 +21,11 @@ conda config --show channels
 git clone https://github.com/Global-Flood-Assessment/MoMProduction.git
 ```
 ## 3. Ininitlize the setup
-Please check [production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/production.cfg) first: in general section, change WORKING_DIR (base directory for downloading and processing data) and OUTPUT_DIR (base directory for the data products); in glofas section, fill in user/passwd for ftp site.
+Please copy [sample_production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/sample_production.cfg) to **production.cfg**.  
+Check production.cfg: 
+- in general section, change WORKING_DIR (base directory for downloading and processing data) and PRODUCT_DIR (base directory for the data products) if necessary;
+- in glofas section, fill in user/passwd for ftp site;  
+- in dfo section, fill in token for download [more on Automating NRT Downloads](https://nrt4.modaps.eosdis.nasa.gov/archive/allData/61)  
 ```
 [general]
 WORKING_DIR: ~/MoM/Processing
@@ -32,6 +36,9 @@ HOST: data-portal.ecmwf.int
 USER: ???
 PASSWD: ???
 DIRECTORY: /for_PDC
+
+[dfo]
+TOKEN: ???
 ```
 Ininitlize the production setup: 
 ```
@@ -39,6 +46,6 @@ python initialize.py
 ```
 It performs the following taks:   
 - create the folder structures defined in production.cfg
-- check username/password in production.cfg
+- check username/password, key in production.cfg
 - unzip watershed.shp 
 

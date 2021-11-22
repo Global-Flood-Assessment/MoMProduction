@@ -48,10 +48,10 @@ if ('?' in user or '?' in passwd):
     print('Please fill in USER/PASSED in glofas section')
     sys.exit()
 
-dfo_key = config.get('dfo','KEY')
-if ('?' in key):
+dfo_token = config.get('dfo','TOKEN')
+if ('?' in dfo_token):
     print('Action required: production.cfg')
-    print('Please fill in KEY in dfo section')
+    print('Please fill in TOKEN in dfo section')
     sys.exit()
 
 # task: check if shp file is unzipped
