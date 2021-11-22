@@ -11,14 +11,14 @@ import configparser
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-config = configparser.SafeConfigParser(allow_no_value=True)
-config.read('%s/production.cfg' % (BASE_DIR))
+config = configparser.ConfigParser(allow_no_value=True)
+config.read(os.path.join(BASE_DIR,"production.cfg"))
 
 # config directory
 # base directory for downloading and processing data
 WORKING_DIR = os.path.expanduser(config.get('general', 'WORKING_DIR'))
 # base directory for the data products  
-OUTPUT_DIR = os.path.expanduser(config.get('general', 'OUTPUT_DIR')) 
+PRODUCT_DIR = os.path.expanduser(config.get('general', 'PRODUCT_DIR')) 
 
 # watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')

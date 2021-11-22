@@ -6,34 +6,53 @@ Inititlize the setup
 """
 
 import os, sys
+import shutil
 from zipfile import ZipFile
+
+# firt check production.cfg
+if not os.path.exists('production.cfg'):
+    shutil.copyfile("sample_production.cfg","production.cfg")
+    print("please check the production.cfg, run initilize again.")
+    sys.exit()
 
 from settings import *
 
 def create_dir(apath):
     '''create dir with a path'''
     if not os.path.exists(apath):
-        print("crate " + apath)
+        print("crete " + apath)
         os.makedirs(apath, exist_ok=True)
 
 print("task: check folder stucture")
 
+# create working dir
 create_dir(WORKING_DIR)
 # task: create the sub folders inside working_dir
 for key in config['processing']:
     subfolder = os.path.join(WORKING_DIR, config.get("processing",key))
     create_dir(subfolder)
 
-# task: check ftp user/password
-user = config.get("glofas", "user")
-passwd = config.get('glofas', "passwd")
+# create product dir
+create_dir(PRODUCT_DIR)
+# task: create the sub folders inside product_dir
+for key in config['products']:
+    subfolder = os.path.join(PRODUCT_DIR, config.get("products",key))
+    create_dir(subfolder)
+
+# task: check ftp user/password, key
+user = config.get("glofas", "USER")
+passwd = config.get('glofas', "PASSWD")
 
 if ('?' in user or '?' in passwd):
     print('Action required: production.cfg')
-    print('Please fill in user/passwd in glofas section')
+    print('Please fill in USER/PASSED in glofas section')
     sys.exit()
-else:
-    print('Task: check user/passwd')
+
+dfo_key = config.get('dfo','KEY')
+if ('?' in key):
+    print('Action required: production.cfg')
+    print('Please fill in KEY in dfo section')
+    sys.exit()
 
 # task: check if shp file is unzipped
 if not os.path.exists(WATERSHED_SHP):
