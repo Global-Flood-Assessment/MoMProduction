@@ -35,7 +35,7 @@ DIRECTORY: /for_PDC
 ```
 Ininitlize the production setup: 
 ```
-python init.py
+python initialize.py
 ```
 It performs the following taks:   
 - create the folder structures defined in production.cfg

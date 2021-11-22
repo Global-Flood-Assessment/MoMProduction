@@ -17,11 +17,12 @@ def create_dir(apath):
         os.makedirs(apath, exist_ok=True)
 
 print("task: check folder stucture")
-create_dir(WORKING_DIR)
 
-# task: create the folders
+create_dir(WORKING_DIR)
+# task: create the sub folders inside working_dir
 for key in config['processing']:
-    print(key)
+    subfolder = os.path.join(WORKING_DIR, config.get("processing",key))
+    create_dir(subfolder)
 
 # task: check ftp user/password
 user = config.get("glofas", "user")
