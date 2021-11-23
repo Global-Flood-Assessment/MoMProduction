@@ -46,6 +46,8 @@ python initialize.py
 ```
 It performs the following taks:   
 - create the folder structures defined in production.cfg
-- check username/password, key in production.cfg
+- check username/password, token in production.cfg
 - unzip watershed.shp 
+
+## 4. Setup cron-job  
 

@@ -1,0 +1,2 @@
+GFMS_Area_wt,GFMS_Area_Min_pt,GFMS_Area_max_pt,GFMS_percArea_wt,GFMS_percArea_Minpt,GFMS_percArea_Maxpt,GFMS_Meandepth_wt,GFMS_Meandepth_Minpt,GFMS_Meandepth_Maxpt,GFMS_Maxdepth_wt,GFMS_Maxdepth_Minpt,GFMS_Maxdepth_Maxpt,GFMS_Duration_wt,GFMS_Duration_Minpt,GFMS_Duration_Maxpt,EPS_Twoyear_wt,EPS_Fiveyear_wt,EPS_Twtyyear_wt,Alert_score
+1000,1,10,5,1,10,10,1,10,10,1,10,24,1,10,10,10,10,3.33

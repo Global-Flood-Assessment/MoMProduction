@@ -1,7 +1,7 @@
 """
 Inititlize the setup
     -- create the folder structures defined in production.cfg
-    -- check username/password in production.cfg
+    -- check username/password, token in production.cfg
     -- unzip watershed.shp
 """
 
