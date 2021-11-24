@@ -39,9 +39,10 @@ def GloFAS_download():
 
 def GloFAS_process():
     """process glofas data"""
+
     new_files = GloFAS_download()
     print(new_files)
-
+    logging.info(new_files)
     return
 
 def GFMS_cron():

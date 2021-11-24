@@ -18,6 +18,10 @@ epilog="""
 """
 
 import argparse
+import logging
+from settings import *
+
+from GFMS_tool import GFMS_cron
 
 def _getParser():
     parser = argparse.ArgumentParser(description=prolog,epilog=epilog,
@@ -27,12 +31,18 @@ def _getParser():
 
     return parser
 
+def run_job(cronjob):
+    """run various cron job"""
+    logging.info("run " + cronjob)
+    if cronjob == "GFMS":
+        GFMS_cron()
+
 def main():
     """execute momjob"""
     # Read command line arguments
     parser = _getParser()
     results = parser.parse_args()
-    print(results)
+    run_job(results.job)
 
 if __name__ == '__main__':
     main()

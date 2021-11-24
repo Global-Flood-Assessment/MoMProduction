@@ -8,6 +8,8 @@ Settings for MoM Production
 """
 import os
 import configparser
+from datetime import date
+import logging
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,3 +29,9 @@ glofas_dir = os.path.join(WORKING_DIR,config.get('processing', 'glofas_dir'))
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')
 WATERSHED_SHP = os.path.join(WATERSHED_DIR, "Watershed_pfaf_id.shp")
 
+# setup logging
+# generate a new log for each month
+todays_date = date.today()
+logfile = "{year}_{month}.log".format(year=todays_date.year,month=todays_date.month)
+logfile = os.path.join(WORKING_DIR,config.get('processing', 'logs'),logfile)
+logging.basicConfig(filename=logfile, format='%(asctime)s - %(module)s - %(levelname)s : %(message)s', level=logging.INFO)
