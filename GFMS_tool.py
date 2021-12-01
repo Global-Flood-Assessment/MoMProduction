@@ -8,7 +8,7 @@ Two main function:
     * GFMS_cron_fix: rerun cron-job for a given date
 """
 
-import os
+import os, sys
 import logging
 
 from settings import *
@@ -41,8 +41,10 @@ def GloFAS_process():
     """process glofas data"""
 
     new_files = GloFAS_download()
-    print(new_files)
-    logging.info(new_files)
+    if len(new_files) == 0:
+        logging.info("no new glofas file to process!")
+        sys.exit()
+
     return
 
 def GFMS_cron():

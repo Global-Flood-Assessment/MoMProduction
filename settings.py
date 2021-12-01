@@ -25,6 +25,8 @@ PRODUCT_DIR = os.path.expanduser(config.get('general', 'PRODUCT_DIR'))
 # config processing directory
 glofas_dir = os.path.join(WORKING_DIR,config.get('processing', 'glofas_dir'))
 
+# config products directory
+
 # watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')
 WATERSHED_SHP = os.path.join(WATERSHED_DIR, "Watershed_pfaf_id.shp")
