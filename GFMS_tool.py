@@ -53,8 +53,8 @@ def GloFAS_process():
     watersheds = watersheds_gdb_reader()
     for data_date in new_files:
         logging.info("processing: " + data_date)
-        fixed_sites = os.path.join(glofas_dir, "threspoints_"+data_date + ".txt") 
-        dyn_sites = os.path.join(glofas_dir, "threspointsDyn_" + data_date + ".txt")
+        fixed_sites = os.path.join(GLOFAS_PROC_DIR, "threspoints_"+data_date + ".txt") 
+        dyn_sites = os.path.join(GLOFAS_PROC_DIR, "threspointsDyn_" + data_date + ".txt")
         # read fixed station data
         header_fixed_19 = ["Point No", "ID", "Basin", "Location", "Station", "Country", "Continent", "Country_code", "Upstream area", "unknown_1", "Lon", "Lat", "empty", "unknown_2", "Days_until_peak", "GloFAS_2yr", "GloFAS_5yr", "GloFAS_20yr", "Alert_level"]
         header_fixed_18 = ["Point No", "ID", "Basin", "Location", "Station", "Country", "Continent", "Country_code", "Upstream area", "Lon", "Lat", "empty", "unknown_2", "Days_until_peak", "GloFAS_2yr", "GloFAS_5yr", "GloFAS_20yr", "Alert_level"]
@@ -121,7 +121,8 @@ def GloFAS_process():
         out_geojson = os.path.join(GLOFAS_DIR, "threspoints_" + data_date + ".geojson")
         gdf_watersheds.to_file(out_geojson,driver='GeoJSON')
     
-    return
+    # return a list date to be processed with GFMS
+    return new_files
 
 def GFMS_cron():
     """ run GFMS cron job"""
