@@ -17,6 +17,7 @@ def watersheds_gdb_reader():
     #watersheds.rename(columns={"pfaf_id": "aqid"},inplace=True)
     #watersheds.set_index("aqid",inplace=True)
     watersheds.set_index("pfaf_id",inplace=True) 
+    watersheds.crs = "EPSG:4326"
 
     return watersheds
 
