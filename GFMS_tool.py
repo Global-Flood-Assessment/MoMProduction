@@ -146,13 +146,71 @@ def GFMS_download(bin_file):
 
         open(binfile_local, 'wb').write(r.content)
 
-    return []
+    # generate header file
+    hdr_header = """NCOLS 2458
+    NROWS 800
+    XLLCORNER -127.25
+    YLLCORNER -50
+    CELLSIZE 0.125
+    PIXELTYPE FLOAT
+    BYTEORDER LSBFIRST
+    NODATA_VALUE -9999
+    """
+    header_file = binfile_local.replace(".bin",".hdr")
+    with open(header_file,"w") as f:
+        f.write(hdr_header)
+    
+    # generate vrt file
+    vrt_template = """<VRTDataset rasterXSize="4916" rasterYSize="1600" subClass="VRTWarpedDataset">
+  <GeoTransform> -1.2725000000000000e+02,  6.2500000000000000e-02,  0.0000000000000000e+00,  5.0000000000000000e+01,  0.0000000000000000e+00, -6.2500000000000000e-02</GeoTransform>
+  <VRTRasterBand dataType="Float32" band="1" subClass="VRTWarpedRasterBand">
+    <NoDataValue>-9999</NoDataValue>
+  </VRTRasterBand>
+  <BlockXSize>512</BlockXSize>
+  <BlockYSize>128</BlockYSize>
+  <GDALWarpOptions>
+    <WarpMemoryLimit>6.71089e+07</WarpMemoryLimit>
+    <ResampleAlg>NearestNeighbour</ResampleAlg>
+    <WorkingDataType>Float32</WorkingDataType>
+    <Option name="INIT_DEST">NO_DATA</Option>
+    <SourceDataset relativeToVRT="1">{}</SourceDataset>
+    <Transformer>
+      <ApproxTransformer>
+        <MaxError>0.125</MaxError>
+        <BaseTransformer>
+          <GenImgProjTransformer>
+            <SrcGeoTransform>-127.25,0.125,0,50,0,-0.125</SrcGeoTransform>
+            <SrcInvGeoTransform>1018,8,0,400,0,-8</SrcInvGeoTransform>
+            <DstGeoTransform>-127.25,0.0625,0,50,0,-0.0625</DstGeoTransform>
+            <DstInvGeoTransform>2036,16,0,800,0,-16</DstInvGeoTransform>
+          </GenImgProjTransformer>
+        </BaseTransformer>
+      </ApproxTransformer>
+    </Transformer>
+    <BandList>
+      <BandMapping src="1" dst="1">
+        <SrcNoDataReal>-9999</SrcNoDataReal>
+        <SrcNoDataImag>0</SrcNoDataImag>
+        <DstNoDataReal>-9999</DstNoDataReal>
+        <DstNoDataImag>0</DstNoDataImag>
+      </BandMapping>
+    </BandList>
+  </GDALWarpOptions>
+</VRTDataset>"""
+
+    # generate VRT file
+    vrt_file = binfile_local.replace(".bin",".vrt")
+    with open(vrt_file,"w") as f:
+        f.write(vrt_template.format(bin_file))
+
+    return vrt_file
 
 def GFMS_data_extractor(bin_file):
     """extract data from a given binfile"""
 
     # download GFMS binfile
     vrt_file = GFMS_download(bin_file)
+    print(vrt_file)
 
 def GFMS_processing(proc_dates_list):
     '''process GFMS data with a given list of dates'''
@@ -163,14 +221,15 @@ def GFMS_processing(proc_dates_list):
         for binhour in binhours:
             bin_file = "Flood_byStor_" + real_date + binhour + ".bin"
             # process bin file
-            GFMS_data_extractor(aqid_csv = None,bin_file=bin_file)
+            GFMS_data_extractor(bin_file)
 
 def GFMS_cron():
     """ run GFMS cron job"""
 
     # process GloFAS data
-    processing_dates = GloFAS_process()
+    #processing_dates = GloFAS_process()
     # process GFMS data
+    processing_dates = ['2021120200']
     GFMS_processing(processing_dates)
 
 def main():
