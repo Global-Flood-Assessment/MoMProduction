@@ -8,7 +8,7 @@ Two main function:
     * GFMS_cron_fix: rerun cron-job for a given date
 """
 
-import os, sys, csv, json
+import os, sys, csv, json, glob
 import logging
 import requests 
 import math
@@ -353,6 +353,14 @@ def GFMS_processing(proc_dates_list):
         os.chdir(GFMS_PROC_DIR)
         zipcmd = 'zip gfms_{adate}.zip Flood_byStor_{adate}*.*'.format(adate = real_date)
         os.system(zipcmd)
+        logging.info('generated: '+ f'Flood_byStor_{real_date}.zip')
+        # remove all the file
+        fileList = glob.glob('Flood_byStor_{adate}*.*'.format(adate = real_date))
+        for filePath in fileList:
+            try:
+                os.remove(filePath)
+            except:
+                logging.WARNING("Error while deleting file : ", filePath)
         os.chdir(curdir)
 
     return
