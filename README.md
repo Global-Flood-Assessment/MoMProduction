@@ -14,7 +14,15 @@ conda config --add channels conda-forge
 conda config --set channel_priority strict
 conda config --show channels
 ```
-### 1.2 Install Packages
+### 1.2 Install Python Packages
+### 1.3 Other software requirement
+Check if zip, wget, gdal are installed.  
+Install the packages if not available:
+```
+sudo apt install zip
+sudo apt install wget
+sudo apt install gdal_bin 
+```
 
 ## 2. Clone MoMProduction repo:
 ```
