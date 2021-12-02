@@ -323,9 +323,18 @@ def GFMS_data_extractor(bin_file):
 
     # download GFMS binfile, generate vrt file
     vrt_file = GFMS_download(bin_file)
+    
     # extract data by watershed
     logging.info("processing: " + vrt_file)
     GFMS_extract_by_watershed(vrt_file)
+    
+    # generate tiff from bin file
+    tiff_name = os.path.basename(vrt_file).replace('.vrt','.tiff')
+    tiff_file = os.path.join(GFMS_DIR,"GFMS_image",tiff_name)
+    gdalcmd = f'gdal_translate -co TILED=YES -co COMPRESS=LZW -of GTiff {vrt_file} {tiff_file}'
+    os.system(gdalcmd)
+    
+    return
 
 def GFMS_processing(proc_dates_list):
     '''process GFMS data with a given list of dates'''
@@ -337,6 +346,8 @@ def GFMS_processing(proc_dates_list):
             bin_file = "Flood_byStor_" + real_date + binhour + ".bin"
             # process bin file
             GFMS_data_extractor(bin_file)
+    
+    return
 
 def GFMS_cron():
     """ run GFMS cron job"""

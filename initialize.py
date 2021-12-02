@@ -28,16 +28,20 @@ print("task: check folder stucture")
 # create working dir
 create_dir(WORKING_DIR)
 # task: create the sub folders inside working_dir
-for key in config['processing']:
-    subfolder = os.path.join(WORKING_DIR, config.get("processing",key))
+for key in config['processing_dir']:
+    subfolder = os.path.join(WORKING_DIR, config.get("processing_dir",key))
     create_dir(subfolder)
 
 # create product dir
 create_dir(PRODUCT_DIR)
 # task: create the sub folders inside product_dir
-for key in config['products']:
-    subfolder = os.path.join(PRODUCT_DIR, config.get("products",key))
+product_sub_folders = ["summary","image","MoM"]
+for key in config['products_dir']:
+    subfolder = os.path.join(PRODUCT_DIR, config.get("products_dir",key))
     create_dir(subfolder)
+    if not "GLOFAS" in key.upper():
+        for product_sub in product_sub_folders:
+            create_dir(os.path.join(subfolder,key.upper()+ "_" + product_sub))
 
 # task: check ftp user/password, key
 user = config.get("glofas", "USER")
