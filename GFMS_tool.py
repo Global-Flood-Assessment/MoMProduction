@@ -8,15 +8,24 @@ Two main function:
     * GFMS_cron_fix: rerun cron-job for a given date
 """
 
-import os, sys
+import os, sys, csv, json
 import logging
 import requests 
+import math
+import numpy as np
 import pandas as pd
 import geopandas
 from datetime import date,timedelta,datetime
+import rasterio
+from rasterio.mask import mask
+from rasterio import Affine # or from affine import Affine
+from shapely.geometry import Point
 
 from settings import *
 from utilities import watersheds_gdb_reader
+
+# no need for cron-job
+from progressbar import progress
 
 def GloFAS_download():
     """download glofas data from ftp"""
@@ -53,7 +62,7 @@ def GloFAS_process():
     # load watersheds data
     watersheds = watersheds_gdb_reader()
     for data_date in new_files:
-        logging.info("processing: " + data_date)
+        logging.info("processing GLoFAS: " + data_date)
         fixed_sites = os.path.join(GLOFAS_PROC_DIR, "threspoints_"+data_date + ".txt") 
         dyn_sites = os.path.join(GLOFAS_PROC_DIR, "threspointsDyn_" + data_date + ".txt")
         # read fixed station data
@@ -112,7 +121,7 @@ def GloFAS_process():
                     "GloFAS_2yr","GloFAS_5yr","GloFAS_20yr","Alert_level","Days_until_peak","pfaf_id"]
         gdf_watersheds.to_csv(out_csv,index=False,columns=out_columns,float_format='%.3f')
         
-        logging.info("glofas: " + out_csv)
+        logging.info("generated: " + out_csv)
 
         # write to excel
         # out_excel = glofasdata + "threspoints_" + data_date + ".xlsx"
@@ -145,6 +154,7 @@ def GFMS_download(bin_file):
             sys.exit()
 
         open(binfile_local, 'wb').write(r.content)
+        logging.info("Download: " + bin_file)
 
     # generate header file
     hdr_header = """NCOLS 2458
@@ -205,12 +215,116 @@ def GFMS_download(bin_file):
 
     return vrt_file
 
+def GFMS_extract_by_mask(vrt_file,mask_json):
+    """extract data for a single watershed"""
+
+    #print(vrt_file)
+    #print(mask_json['features'][0]['geometry'])
+
+    with rasterio.open(vrt_file) as src:
+        try:
+            out_image, out_transform = mask(src, [mask_json['features'][0]['geometry']], crop=True)
+        except ValueError as e:
+            #'Input shapes do not overlap raster.'
+            #print(e)
+            src = None
+            # return empty dataframe
+            return pd.DataFrame()
+
+    # extract data
+    no_data = src.nodata
+    # extract the values of the masked array
+    #print(out_image)
+    data = out_image[0]
+    # extract the row, columns of the valid values
+    row, col = np.where(data != no_data) 
+    point_value = np.extract(data != no_data, data)
+    if (len(point_value)== 0):
+        src = None
+        # return empty dataframe
+        return pd.DataFrame()
+
+    T1 = out_transform * Affine.translation(0.5, 0.5) # reference the pixel centre
+    rc2xy = lambda r, c: (c, r) * T1  
+    px,py=src.res
+    #print (px,py)
+    pixel_area_km2 = lambda lon, lat: 111.111*111.111*math.cos(lat*0.01745)*px*py 
+    d = geopandas.GeoDataFrame({'col':col,'row':row,'intensity':point_value})
+    # coordinate transformation
+    d['lon'] = d.apply(lambda row: rc2xy(row.row,row.col)[0], axis=1)
+    d['lat'] = d.apply(lambda row: rc2xy(row.row,row.col)[1], axis=1)
+    d['area'] = d.apply(lambda row: pixel_area_km2(row.lon,row.lat), axis=1)
+    
+    # geometry 
+    d['geometry'] =d.apply(lambda row: Point(row['lon'], row['lat']), axis=1)
+    # first 2 points
+    src = None
+    return d
+
+
+def GFMS_extract_by_watershed(vrt_file):
+    """extract and summary"""
+
+    # load watersheds data
+    watersheds = watersheds_gdb_reader()
+    pfaf_id_list = watersheds.index.tolist()
+
+    # setup output file
+    headers_list = ["pfaf_id","GFMS_TotalArea_km","GFMS_perc_Area","GFMS_MeanDepth","GFMS_MaxDepth","GFMS_Duration"]
+    summary_file = os.path.join(GFMS_DIR, os.path.basename(vrt_file)[:-4]+ ".csv")
+    if not os.path.exists(summary_file):
+        with open(summary_file,'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers_list)  
+    else:
+        # already processed, 
+        return 
+
+    # write out the summary
+    count = 0
+    with open(summary_file, 'a') as f:
+        writer = csv.writer(f)
+
+        for pfaf_id in pfaf_id_list:
+            # for command line mode
+            count += 1
+            progress(count,  len(pfaf_id_list), status='pfaf_id')
+
+            test_json = json.loads(geopandas.GeoSeries([watersheds.loc[pfaf_id,'geometry']]).to_json())
+            # plot check
+            data_points = GFMS_extract_by_mask(vrt_file, test_json)
+            
+            # write summary to a csv file
+            GFMS_Duration = 0
+            if (not data_points.empty):
+                GFMS_TotalArea = data_points['area'].sum()
+                if GFMS_TotalArea > 100.0:
+                    GFMS_Duration = 3                
+                GFMS_Area_percent = GFMS_TotalArea/watersheds.loc[pfaf_id]['area_km2']*100
+                GFMS_MeanDepth = data_points['intensity'].mean()
+                GFMS_MaxDepth = data_points['intensity'].max()
+            else:
+                GFMS_TotalArea = 0.0
+                GFMS_Area_percent = 0.0
+                GFMS_MeanDepth = 0.0
+                GFMS_MaxDepth = 0.0
+                GFMS_Duration = 0.0
+
+            results_list = [pfaf_id,GFMS_TotalArea,GFMS_Area_percent,GFMS_MeanDepth,GFMS_MaxDepth,GFMS_Duration]
+            writer.writerow(results_list)
+    
+    logging.info("generated: " + summary_file)
+
+    return 
+
 def GFMS_data_extractor(bin_file):
     """extract data from a given binfile"""
 
-    # download GFMS binfile
+    # download GFMS binfile, generate vrt file
     vrt_file = GFMS_download(bin_file)
-    print(vrt_file)
+    # extract data by watershed
+    logging.info("processing: " + vrt_file)
+    GFMS_extract_by_watershed(vrt_file)
 
 def GFMS_processing(proc_dates_list):
     '''process GFMS data with a given list of dates'''
