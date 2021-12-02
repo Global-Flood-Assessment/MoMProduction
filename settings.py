@@ -28,7 +28,11 @@ GFMS_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'gfms'))
 
 # config products directory
 GLOFAS_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'GLOFAS'))
+
 GFMS_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'GFMS'))
+GFMS_SUM_DIR = os.path.join(GFMS_DIR,"GFMS_summary")
+GFMS_IMG_DIR = os.path.join(GFMS_DIR,"GFMS_image")
+GFMS_MOM_DIR = os.path.join(GFMS_DIR,"GFMS_MoM")
 
 # watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')

@@ -272,7 +272,7 @@ def GFMS_extract_by_watershed(vrt_file):
 
     # setup output file
     headers_list = ["pfaf_id","GFMS_TotalArea_km","GFMS_perc_Area","GFMS_MeanDepth","GFMS_MaxDepth","GFMS_Duration"]
-    summary_file = os.path.join(GFMS_DIR, os.path.basename(vrt_file)[:-4]+ ".csv")
+    summary_file = os.path.join(GFMS_SUM_DIR, os.path.basename(vrt_file)[:-4]+ ".csv")
     if not os.path.exists(summary_file):
         with open(summary_file,'w') as f:
             writer = csv.writer(f)
@@ -330,9 +330,10 @@ def GFMS_data_extractor(bin_file):
     
     # generate tiff from bin file
     tiff_name = os.path.basename(vrt_file).replace('.vrt','.tiff')
-    tiff_file = os.path.join(GFMS_DIR,"GFMS_image",tiff_name)
+    tiff_file = os.path.join(GFMS_IMG_DIR,tiff_name)
     gdalcmd = f'gdal_translate -co TILED=YES -co COMPRESS=LZW -of GTiff {vrt_file} {tiff_file}'
     os.system(gdalcmd)
+    logging.info("geneated: " + tiff_file)
     
     return
 
