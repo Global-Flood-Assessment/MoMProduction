@@ -333,7 +333,7 @@ def GFMS_data_extractor(bin_file):
     tiff_file = os.path.join(GFMS_IMG_DIR,tiff_name)
     gdalcmd = f'gdal_translate -co TILED=YES -co COMPRESS=LZW -of GTiff {vrt_file} {tiff_file}'
     os.system(gdalcmd)
-    logging.info("geneated: " + tiff_file)
+    logging.info("generated: " + tiff_file)
     
     return
 
@@ -346,8 +346,15 @@ def GFMS_processing(proc_dates_list):
         for binhour in binhours:
             bin_file = "Flood_byStor_" + real_date + binhour + ".bin"
             # process bin file
-            GFMS_data_extractor(bin_file)
-    
+            #GFMS_data_extractor(bin_file)
+
+        # zip GFMS data after processing
+        curdir = os.getcwd()
+        os.chdir(GFMS_PROC_DIR)
+        zipcmd = 'zip gfms_{adate}.zip Flood_byStor_{adate}*.*'.format(adate = real_date)
+        os.system(zipcmd)
+        os.chdir(curdir)
+
     return
 
 def GFMS_cron():
