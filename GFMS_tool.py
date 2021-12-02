@@ -25,7 +25,7 @@ from settings import *
 from utilities import watersheds_gdb_reader
 
 # no need for cron-job
-from progressbar import progress
+# from progressbar import progress
 
 def GloFAS_download():
     """download glofas data from ftp"""
@@ -282,14 +282,14 @@ def GFMS_extract_by_watershed(vrt_file):
         return 
 
     # write out the summary
-    count = 0
+    #count = 0
     with open(summary_file, 'a') as f:
         writer = csv.writer(f)
 
         for pfaf_id in pfaf_id_list:
             # for command line mode
-            count += 1
-            progress(count,  len(pfaf_id_list), status='pfaf_id')
+            #count += 1
+            #progress(count,  len(pfaf_id_list), status='pfaf_id')
 
             test_json = json.loads(geopandas.GeoSeries([watersheds.loc[pfaf_id,'geometry']]).to_json())
             # plot check
