@@ -10,6 +10,7 @@ Two main function:
 
 import os, sys
 import logging
+import requests 
 import pandas as pd
 import geopandas
 from datetime import date,timedelta,datetime
@@ -30,7 +31,7 @@ def GloFAS_download():
     file_list = ftp.nlst()
     job_list = []
     for txt in file_list:
-        save_txt = os.path.join(glofas_dir,txt)
+        save_txt = os.path.join(GLOFAS_PROC_DIR,txt)
         if os.path.exists(save_txt):
             continue
         with open(save_txt, 'wb') as fp:
@@ -124,10 +125,53 @@ def GloFAS_process():
     # return a list date to be processed with GFMS
     return new_files
 
+def GFMS_download(bin_file):
+    """download a given bin file"""
+
+    # find download url
+    datestr = bin_file.split("_")[2]
+    baseurl = config.get('gfms','HOST')
+    dataurl = os.path.join(baseurl, datestr[:4], datestr[:6])
+    download_data_url = os.path.join(dataurl,bin_file)
+
+    # check if it download
+    binfile_local = os.path.join(GFMS_PROC_DIR,bin_file)
+    if not os.path.exists(binfile_local):
+        # download the data
+        try:
+            r = requests.get(download_data_url, allow_redirects=True)
+        except requests.exceptions.HTTPError as e:
+            logging.ERROR("Downlaod failed: " + e.response.text)
+            sys.exit()
+
+        open(binfile_local, 'wb').write(r.content)
+
+    return []
+
+def GFMS_data_extractor(bin_file):
+    """extract data from a given binfile"""
+
+    # download GFMS binfile
+    vrt_file = GFMS_download(bin_file)
+
+def GFMS_processing(proc_dates_list):
+    '''process GFMS data with a given list of dates'''
+    
+    binhours = ["00","03","06","09","12","15","18","21"]
+    for data_date in proc_dates_list:
+        real_date = data_date[:-2]
+        for binhour in binhours:
+            bin_file = "Flood_byStor_" + real_date + binhour + ".bin"
+            # process bin file
+            GFMS_data_extractor(aqid_csv = None,bin_file=bin_file)
+
 def GFMS_cron():
     """ run GFMS cron job"""
 
+    # process GloFAS data
     processing_dates = GloFAS_process()
+    # process GFMS data
+    GFMS_processing(processing_dates)
 
 def main():
     """test code"""
