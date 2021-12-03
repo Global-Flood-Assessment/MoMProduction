@@ -15,7 +15,7 @@ conda config --set channel_priority strict
 conda config --show channels
 ```
 ### 1.2 Install Python Packages
-### 1.3 Other software requirement
+### 1.3 Other software requirements
 Check if zip, wget, gdal are installed.  
 Install the packages if not available:
 ```

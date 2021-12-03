@@ -272,7 +272,8 @@ def GFMS_extract_by_watershed(vrt_file):
 
     # setup output file
     headers_list = ["pfaf_id","GFMS_TotalArea_km","GFMS_perc_Area","GFMS_MeanDepth","GFMS_MaxDepth","GFMS_Duration"]
-    summary_file = os.path.join(GFMS_SUM_DIR, os.path.basename(vrt_file)[:-4]+ ".csv")
+    # put summary file into proc folder before fix-duration
+    summary_file = os.path.join(GFMS_PROC_DIR, os.path.basename(vrt_file)[:-4]+ ".csv")
     if not os.path.exists(summary_file):
         with open(summary_file,'w') as f:
             writer = csv.writer(f)
@@ -309,7 +310,7 @@ def GFMS_extract_by_watershed(vrt_file):
                 GFMS_Area_percent = 0.0
                 GFMS_MeanDepth = 0.0
                 GFMS_MaxDepth = 0.0
-                GFMS_Duration = 0.0
+                GFMS_Duration = 0
 
             results_list = [pfaf_id,GFMS_TotalArea,GFMS_Area_percent,GFMS_MeanDepth,GFMS_MaxDepth,GFMS_Duration]
             writer.writerow(results_list)
@@ -337,6 +338,36 @@ def GFMS_data_extractor(bin_file):
     
     return
 
+def GFMS_fix_duration(csv0, csvlist):
+    """ fix duration"""
+    # notice the folder issue
+    # base0 shall be in GFMS_SUM_DIR
+    # unfixed are in GFMS_PROC_DIR
+
+    # first check if csv0 exists
+    basecsv = os.path.join(GFMS_SUM_DIR,csv0)
+    if os.path.exists(basecsv):
+        df0 = pd.read_csv(basecsv)
+        start_in = 0
+    else:
+        df0 = pd.read_csv(os.path.join(GFMS_PROC_DIR,csvlist[0]))
+        start_in = 1
+        # also write out to SUM folder
+        df0.to_csv(os.path.join(GFMS_SUM_DIR,csvlist[0]),index=False)
+
+    for name in csvlist[start_in:]:
+        csv_file = os.path.join(GFMS_PROC_DIR, name)
+        df = pd.read_csv(csv_file)
+        df['GFMS_Duration0'] = df['pfaf_id'].map(df0.set_index('pfaf_id')['GFMS_Duration'])
+        df['GFMS_Duration'] = df.apply(lambda row: 3 + int(row.GFMS_Duration0) if (row.GFMS_TotalArea_km > 100.0) else 0, axis = 1)
+        del df['GFMS_Duration0']
+        fix_csv = os.path.join(GFMS_SUM_DIR,name)
+        df.to_csv(fix_csv,index=False)
+        df0 = None
+        df0 = df
+        df = None
+
+
 def GFMS_processing(proc_dates_list):
     '''process GFMS data with a given list of dates'''
     
@@ -348,19 +379,27 @@ def GFMS_processing(proc_dates_list):
             # process bin file
             #GFMS_data_extractor(bin_file)
 
+        # run duration caculation
+        # find the previous one, previous day 21 hour
+        previous_date = datetime.strptime(real_date,"%Y%m%d") - timedelta(days=1)
+        base0= "Flood_byStor_" + previous_date.strftime("%Y%m%d") + "21.csv"
+        fix_list = ["Flood_byStor_" + real_date + x + ".csv" for x in binhours]
+        # call fix duration
+        GFMS_fix_duration(base0,fix_list)
+
         # zip GFMS data after processing
         curdir = os.getcwd()
         os.chdir(GFMS_PROC_DIR)
         zipcmd = 'zip gfms_{adate}.zip Flood_byStor_{adate}*.*'.format(adate = real_date)
-        os.system(zipcmd)
+        #os.system(zipcmd)
         logging.info('generated: '+ f'Flood_byStor_{real_date}.zip')
         # remove all the file
-        fileList = glob.glob('Flood_byStor_{adate}*.*'.format(adate = real_date))
-        for filePath in fileList:
-            try:
-                os.remove(filePath)
-            except:
-                logging.WARNING("Error while deleting file : ", filePath)
+        # fileList = glob.glob('Flood_byStor_{adate}*.*'.format(adate = real_date))
+        # for filePath in fileList:
+        #     try:
+        #         os.remove(filePath)
+        #     except:
+        #         logging.WARNING("Error while deleting file : ", filePath)
         os.chdir(curdir)
 
     return
