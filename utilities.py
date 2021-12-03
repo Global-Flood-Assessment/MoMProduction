@@ -5,6 +5,7 @@ routines shared across the modules
 '''
 
 import settings
+import pandas as pd
 import geopandas 
 
 def watersheds_gdb_reader():
@@ -20,6 +21,13 @@ def watersheds_gdb_reader():
     watersheds.crs = "EPSG:4326"
 
     return watersheds
+
+
+def read_data(datafile):
+    df = pd.read_csv(datafile)
+    df = pd.DataFrame(df)
+    return df
+
 
 def main():
     ''' test routines'''

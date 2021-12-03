@@ -23,6 +23,7 @@ from shapely.geometry import Point
 
 from settings import *
 from utilities import watersheds_gdb_reader
+from GFMS_MoM import flood_severity
 
 # no need for cron-job
 # from progressbar import progress
@@ -363,6 +364,7 @@ def GFMS_fix_duration(csv0, csvlist):
         del df['GFMS_Duration0']
         fix_csv = os.path.join(GFMS_SUM_DIR,name)
         df.to_csv(fix_csv,index=False)
+        logging.info("generated: " + fix_csv)
         df0 = None
         df0 = df
         df = None
@@ -386,6 +388,11 @@ def GFMS_processing(proc_dates_list):
         fix_list = ["Flood_byStor_" + real_date + x + ".csv" for x in binhours]
         # call fix duration
         GFMS_fix_duration(base0,fix_list)
+
+        # flood severity calculation
+        gfmscsv = os.path.join(GFMS_SUM_DIR, "Flood_byStor_" + data_date + ".csv")
+        glofascsv = os.path.join(GLOFAS_DIR,  "threspoints_" + data_date + ".csv")
+        flood_severity(gfmscsv,glofascsv,real_date)
 
         # zip GFMS data after processing
         curdir = os.getcwd()
