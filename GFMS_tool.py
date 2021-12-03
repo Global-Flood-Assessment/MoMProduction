@@ -379,7 +379,7 @@ def GFMS_processing(proc_dates_list):
         for binhour in binhours:
             bin_file = "Flood_byStor_" + real_date + binhour + ".bin"
             # process bin file
-            #GFMS_data_extractor(bin_file)
+            GFMS_data_extractor(bin_file)
 
         # run duration caculation
         # find the previous one, previous day 21 hour
@@ -398,15 +398,15 @@ def GFMS_processing(proc_dates_list):
         curdir = os.getcwd()
         os.chdir(GFMS_PROC_DIR)
         zipcmd = 'zip gfms_{adate}.zip Flood_byStor_{adate}*.*'.format(adate = real_date)
-        #os.system(zipcmd)
+        os.system(zipcmd)
         logging.info('generated: '+ f'Flood_byStor_{real_date}.zip')
         # remove all the file
-        # fileList = glob.glob('Flood_byStor_{adate}*.*'.format(adate = real_date))
-        # for filePath in fileList:
-        #     try:
-        #         os.remove(filePath)
-        #     except:
-        #         logging.WARNING("Error while deleting file : ", filePath)
+        fileList = glob.glob('Flood_byStor_{adate}*.*'.format(adate = real_date))
+        for filePath in fileList:
+            try:
+                os.remove(filePath)
+            except:
+                logging.WARNING("Error while deleting file : ", filePath)
         os.chdir(curdir)
 
     return
@@ -415,9 +415,9 @@ def GFMS_cron():
     """ run GFMS cron job"""
 
     # process GloFAS data
-    #processing_dates = GloFAS_process()
+    processing_dates = GloFAS_process()
     # process GFMS data
-    processing_dates = ['2021120200']
+    #processing_dates = ['2021120200']
     GFMS_processing(processing_dates)
 
 def main():
