@@ -37,7 +37,7 @@ Check production.cfg:
 ```
 [general]
 WORKING_DIR: ~/MoM/Processing
-OUTPUT_DIR: ~/MoM/Products
+PRODUCT_DIR: ~/MoM/Products
 
 [glofas]
 HOST: data-portal.ecmwf.int
@@ -59,3 +59,35 @@ It performs the following taks:
 
 ## 4. Setup cron-job  
 
+## 5. Folder structures  
+Folder structures is defined in production.cfg, the default one is listed. Modify [general],[processing_dir], [products_dir] to change the locations. The minimum required free diskspace for data processing is 20G.     
+Processing folder holds the downloaded data and intermediate outputs, all the contents can be deleted periodically to save the disk space. The processed data is usually archived daily as a zip, such as gfms_20211202.zip in its corresponding processing folder. For DFO/VIIRS data, setting storage save flag to true deletes the downloaded data immediately after the processing. 
+```
+MoM
+├── Processing
+│   ├── dfo
+│   ├── gfms
+│   ├── glofas
+│   ├── hwrf
+│   ├── logs
+│   └── viirs
+└── Products
+    ├── DFO
+    │   ├── DFO_image
+    │   ├── DFO_MoM
+    │   └── DFO_summary
+    ├── FINAL_MoM
+    ├── GFMS
+    │   ├── GFMS_image
+    │   ├── GFMS_MoM
+    │   └── GFMS_summary
+    ├── GLOFAS
+    ├── HWRF
+    │   ├── HWRF_image
+    │   ├── HWRF_MoM
+    │   └── HWRF_summary
+    └── VIIRS
+        ├── VIIRS_image
+        ├── VIIRS_MoM
+        └── VIIRS_summary
+```

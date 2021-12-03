@@ -36,10 +36,11 @@ for key in config['processing_dir']:
 create_dir(PRODUCT_DIR)
 # task: create the sub folders inside product_dir
 product_sub_folders = ["summary","image","MoM"]
+product_with_subfolder = ['GFMS','HWRF','DFO','VIIRS']
 for key in config['products_dir']:
     subfolder = os.path.join(PRODUCT_DIR, config.get("products_dir",key))
     create_dir(subfolder)
-    if not "GLOFAS" in key.upper():
+    if key.upper() in product_with_subfolder:
         for product_sub in product_sub_folders:
             create_dir(os.path.join(subfolder,key.upper()+ "_" + product_sub))
 
