@@ -22,19 +22,29 @@ WORKING_DIR = os.path.expanduser(config.get('general', 'WORKING_DIR'))
 # base directory for the data products  
 PRODUCT_DIR = os.path.expanduser(config.get('general', 'PRODUCT_DIR')) 
 
-# config processing directory
+# config GLOFAS directory
 GLOFAS_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'glofas'))
-GFMS_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'gfms'))
-
-# config products directory
 GLOFAS_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'GLOFAS'))
 
+# config GFMS directory
+GFMS_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'gfms'))
 GFMS_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'GFMS'))
 GFMS_SUM_DIR = os.path.join(GFMS_DIR,"GFMS_summary")
 GFMS_IMG_DIR = os.path.join(GFMS_DIR,"GFMS_image")
 GFMS_MOM_DIR = os.path.join(GFMS_DIR,"GFMS_MoM")
 
-# watershed shp file
+# config DFO directory
+DFO_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'gfms'))
+DFO_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'DFO'))
+DFO_SUM_DIR = os.path.join(DFO_DIR,"DFO_summary")
+DFO_IMG_DIR = os.path.join(DFO_DIR,"DFO_image")
+DFO_MOM_DIR = os.path.join(DFO_DIR,"DFO_MoM")
+
+# config VIIRS directory
+
+# config HWRF folder
+
+# config watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')
 WATERSHED_SHP = os.path.join(WATERSHED_DIR, "Watershed_pfaf_id.shp")
 
