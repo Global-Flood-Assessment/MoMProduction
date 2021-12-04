@@ -37,14 +37,21 @@ def check_status(adate):
     
     return processed
 
+def get_hosturl():
+    """ get the host url"""
+    baseurl = config.get('dfo','HOST')
+    cur_year  = date.today().year
+    hosturl = os.path.join(baseurl,str(cur_year))
+    
+    return hosturl
+
 def generate_procesing_list():
     """ generate list of date to process"""
-    hosturl = config.get('dfo','HOST')
-    cur_year  = date.today().year
-    hosturl = os.path.join(hosturl,str(cur_year))
+    hosturl = get_hosturl()   
     reqs = requests.get(hosturl)
     soup = BeautifulSoup(reqs.text,"html.parser")
     
+    cur_year = hosturl[-4:]
     datelist = {}
     for link in soup.find_all('a'):
         day_num = link.string
@@ -57,6 +64,32 @@ def generate_procesing_list():
 
     return datelist
 
+def dfo_download(subfolder):
+    """ download a subfolder """
+
+    # check if there is unfinished download
+    d_dir = os.path.join(DFO_PROC_DIR,subfolder)
+    if os.path.exists(d_dir):
+        # is file cases
+        if os.path.isfile(d_dir):
+            os.remove(d_dir)
+        else:
+            # remove the subfolder
+            shutil.rmtree(d_dir)   
+
+    dfokey = config.get('dfo','TOKEN')
+    dataurl = os.path.join(get_hosturl(), subfolder)
+    wgetcmd = 'wget -r --no-parent -R .html,.tmp -nH -l1 --cut-dirs=8 {dataurl} --header "Authorization: Bearer {key}" -P {downloadfolder}'
+    wgetcmd = wgetcmd.format(dataurl = dataurl,key=dfokey,downloadfolder=DFO_PROC_DIR)
+    #print(wgetcmd)
+    exitcode = subprocess.call(wgetcmd, shell=True)
+    if not exitcode == 0:
+        #something wrong with downloading
+        logging.warning("download failed: " + dataurl)
+        sys.exit()
+
+    return
+
 def DFO_cron():
     """cron job to process DFO"""
 
@@ -65,7 +98,10 @@ def DFO_cron():
         logging.info("no new data to process!")
         sys.exit(0)    
     
-    print(datelist)
+    for key in datelist:
+        logging.info("download: " + key)
+        dfo_download(key)
+        logging.info("download finished!")
     
     return
 
