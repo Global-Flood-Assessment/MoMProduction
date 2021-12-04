@@ -12,6 +12,7 @@ from datetime import date
 import logging
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DATA_DIR = os.path.join(BASE_DIR,'data')
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.read(os.path.join(BASE_DIR,"production.cfg"))
@@ -42,7 +43,13 @@ DFO_MOM_DIR = os.path.join(DFO_DIR,"DFO_MoM")
 
 # config VIIRS directory
 
-# config HWRF folder
+
+# config HWRF directory
+HWRF_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'hwrf'))
+HWRF_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'HWRF'))
+HWRF_SUM_DIR = os.path.join(HWRF_DIR,"HWRF_summary")
+HWRF_IMG_DIR = os.path.join(HWRF_DIR,"HWRF_image")
+HWRF_MOM_DIR = os.path.join(HWRF_DIR,"HWRF_MoM")
 
 # config watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')

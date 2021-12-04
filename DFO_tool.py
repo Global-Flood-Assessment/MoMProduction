@@ -24,6 +24,7 @@ from rasterio.mask import mask
 
 from settings import *
 from utilities import watersheds_gdb_reader
+from DFO_MoM import update_DFO_MoM
 
 # for command line mode
 from progressbar import progress
@@ -298,14 +299,17 @@ def DFO_cron():
     
     for key in datelist:
         logging.info("download: " + key)
-        #dfo_download(key)
+        dfo_download(key)
         logging.info("download finished!")
         logging.info("processing: " + key)
         # process data
         # key: folder name
         # datelist[key]: real date
         DFO_process(key,datelist[key])
+        # run DFO_MoM
+        update_DFO_MoM(datelist[key])
         logging.info("processing finished: " + key)
+
     return
 
 def main():
