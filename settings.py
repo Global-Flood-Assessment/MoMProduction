@@ -42,7 +42,11 @@ DFO_IMG_DIR = os.path.join(DFO_DIR,"DFO_image")
 DFO_MOM_DIR = os.path.join(DFO_DIR,"DFO_MoM")
 
 # config VIIRS directory
-
+VIIRS_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'VIIRS'))
+VIIRS_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'VIIRS'))
+VIIRS_SUM_DIR = os.path.join(VIIRS_DIR,"VIIRS_summary")
+VIIRS_IMG_DIR = os.path.join(VIIRS_DIR,"VIIRS_image")
+VIIRS_MOM_DIR = os.path.join(VIIRS_DIR,"VIIRS_MoM")
 
 # config HWRF directory
 HWRF_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'hwrf'))
