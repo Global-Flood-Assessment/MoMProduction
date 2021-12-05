@@ -23,6 +23,7 @@ import pandas as pd
 import geopandas as gpd
 
 import settings
+from utilities import watersheds_gdb_reader, read_data
 
 def generate_adate():
     '''generate 1 day delay date'''
@@ -111,16 +112,90 @@ def build_tiff(adate):
         if settings.config['storage'].getboolean('viirs_save'):
             print('zip downloaded file')
             zipped = os.path.join(settings.VIIRS_PROC_DIR,'VIIRS_{}.zip'.format(adate))
-            zipcmd = f'zip -r -0 {zipped} ./*'
-            #os.system(zipcmd)
+            zipcmd = f'zip {zipped} RIVER*.tif'
+            os.system(zipcmd)
             logging.info("generated: " + zipped)
 
-        # for tif in tiff_l:
-        #     os.remove(tif)
+        for tif in tiff_l:
+            os.remove(tif)
 
         final_tiff.append(tiff_file)
     
     return final_tiff  
+    
+def VIIRS_extract_by_mask(mask_json,tiff):
+    with rasterio.open(tiff) as src:
+        try:
+            out_image, out_transform = mask(src, [mask_json['features'][0]['geometry']], crop=True)
+        except ValueError as e:
+            #'Input shapes do not overlap raster.'
+            src = None
+            area=0
+            # return empty dataframe
+            return area
+    data = out_image[0]
+    point_count = np.count_nonzero((data>140) & (data<201))
+    src = None
+    # total area
+    #resolution is 375m
+    area = point_count * 0.375 * 0.375
+    return area
+
+def VIIRS_extract_by_watershed(adate,tiffs):
+    """extract data by wastershed"""
+
+    watersheds = watersheds_gdb_reader()
+    pfafid_list = watersheds.index.tolist()
+
+    # two tiffs
+    # VIIRS_1day_composite20210825_flood.tiff
+    # VIIRS_5day_composite20210825_flood.tiff
+
+    csv_dict = {}
+    for tiff in tiffs:
+        if "1day" in tiff:
+            field_prefix = "oneday"
+        if "5day" in tiff:
+            field_prefix = "fiveday"
+        csv_file = tiff.replace('.tiff','.csv')
+        headers_list = ["pfaf_id",field_prefix+"Flood_Area_km",field_prefix+"perc_Area"]
+        #write header
+        with open(csv_file,'w') as f:   
+            writer = csv.writer(f)
+            writer.writerow(headers_list)
+        with open(csv_file, 'a') as f:
+            writer = csv.writer(f)
+            for the_pfafid in pfafid_list:
+                test_json = json.loads(gpd.GeoSeries([watersheds.loc[the_pfafid,'geometry']]).to_json())
+                area = VIIRS_extract_by_mask(test_json,tiff)              
+                perc_Area = area/watersheds.loc[the_pfafid]['area_km2']*100
+                results_list = [the_pfafid,area,perc_Area]
+                writer.writerow(results_list)
+        csv_dict[field_prefix] = csv_file
+
+    join = read_data(csv_dict['oneday'])
+    join = join[join.onedayFlood_Area_km != 0]    
+
+    join1 = read_data(csv_dict['fiveday'])
+    join1 = join1[join1.fivedayFlood_Area_km != 0]
+
+    merge = pd.merge(join.set_index('pfaf_id'), join1.set_index('pfaf_id'), on='pfaf_id', how='outer')
+    merge.fillna(0, inplace=True) 
+
+    #VIIRS_Flood_yyyymmdd.csv
+    merged_csv = os.path.join(settings.VIIRS_SUM_DIR,"VIIRS_Flood_{}.csv".format(adate))
+    merge.to_csv(merged_csv)  
+    logging.info("generated: " + merged_csv)
+
+    # need clean up
+    os.remove(csv_dict['oneday'])
+    os.remove(csv_dict['fiveday'])
+
+    # remove tiff
+    os.remove(tiffs[0])
+    os.remove(tiffs[1])
+
+    return
 
 def VIIRS_cron(adate=""):
     """ main cron script"""
@@ -145,11 +220,10 @@ def VIIRS_cron(adate=""):
     os.chdir(settings.VIIRS_PROC_DIR)
 
     # # get two tiffs
-    tiffs = build_tiff(adate)
-    print(tiffs)
-    
+    #tiffs = build_tiff(adate)
+    tiffs = ['VIIRS_1day_composite20211203_flood.tiff', 'VIIRS_5day_composite20211203_flood.tiff']
     # # extract data from tiffs
-    # VIIRS_extract_by_watershed(adate,tiffs)
+    VIIRS_extract_by_watershed(adate,tiffs)
     os.chdir(settings.BASE_DIR)
     return
 
