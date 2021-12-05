@@ -218,8 +218,8 @@ def HWRF_extract_by_watershed(raintiff):
     # has_data, move file to the right locaition
     # no_data, delete all the file
     if has_data:
-        shutil.move(output_csv,settings.HWRF_SUM_DIR)
-        shutil.move(raintiff,settings.HWRF_IMG_DIR)
+        shutil.move(output_csv,os.path.join(settings.HWRF_SUM_DIR,output_csv))
+        shutil.move(raintiff,os.path.join(settings.HWRF_IMG_DIR,raintiff))
         os.remove(raintiff.replace(".tiff",".vrt"))
     else:
         os.remove(raintiff)
