@@ -170,7 +170,7 @@ def HWRF_extract_by_mask(mask_json,tiff):
         return pd.DataFrame()
 
     T1 = out_transform * Affine.translation(0.5, 0.5) # reference the pixel centre
-    rc2xy = lambda r, c: (c, r) * T1  
+    rc2xy = lambda r, c: T1* (c, r) 
     px,py=src.res
     #print (px,py)
     pixel_area_km2 = lambda lon, lat: 111.111*111.111*math.cos(lat*0.01745)*px*py 
