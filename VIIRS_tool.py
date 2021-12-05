@@ -24,6 +24,7 @@ import geopandas as gpd
 
 import settings
 from utilities import watersheds_gdb_reader, read_data
+from VIIRS_MoM import update_VIIRS_MoM
 
 def generate_adate():
     '''generate 1 day delay date'''
@@ -122,7 +123,7 @@ def build_tiff(adate):
         final_tiff.append(tiff_file)
     
     return final_tiff  
-    
+
 def VIIRS_extract_by_mask(mask_json,tiff):
     with rasterio.open(tiff) as src:
         try:
@@ -219,12 +220,17 @@ def VIIRS_cron(adate=""):
     # change dir to VIIRSraw
     os.chdir(settings.VIIRS_PROC_DIR)
 
-    # # get two tiffs
-    #tiffs = build_tiff(adate)
-    tiffs = ['VIIRS_1day_composite20211203_flood.tiff', 'VIIRS_5day_composite20211203_flood.tiff']
-    # # extract data from tiffs
+    # get two tiffs
+    tiffs = build_tiff(adate)
+
+    # extract data from tiffs
     VIIRS_extract_by_watershed(adate,tiffs)
+    
+    # update VIIRS MoM
+    update_VIIRS_MoM(adate)
+    
     os.chdir(settings.BASE_DIR)
+    
     return
 
 def main():
