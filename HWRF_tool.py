@@ -19,7 +19,9 @@ import math
 from shapely.geometry import Point
 import shutil
 import zipfile
+
 import settings
+from utilities import watersheds_gdb_reader
 
 def check_status(adate):
     """ check if a give date is processed"""
@@ -141,6 +143,92 @@ def process_rain(adate,TC_Rain):
 
     return raintiff
 
+def HWRF_extract_by_mask(mask_json,tiff):
+    """extract by each watershed"""
+
+    with rasterio.open(tiff) as src:
+        try:
+            out_image, out_transform = mask(src, [mask_json['features'][0]['geometry']], crop=True)
+        except ValueError as e:
+            #'Input shapes do not overlap raster.'
+            #print(e)
+            src = None
+            # return empty dataframe
+            return pd.DataFrame()
+
+    # extract data
+    no_data = src.nodata
+    # extract the values of the masked array
+    #print(out_image)
+    data = out_image[0]
+    # extract the row, columns of the valid values
+    row, col = np.where(data != no_data) 
+    point_value = np.extract(data != no_data, data)
+    if (len(point_value)== 0):
+        src = None
+        # return empty dataframe
+        return pd.DataFrame()
+
+    T1 = out_transform * Affine.translation(0.5, 0.5) # reference the pixel centre
+    rc2xy = lambda r, c: (c, r) * T1  
+    px,py=src.res
+    #print (px,py)
+    pixel_area_km2 = lambda lon, lat: 111.111*111.111*math.cos(lat*0.01745)*px*py 
+    d = gpd.GeoDataFrame({'col':col,'row':row,'intensity':point_value})
+    # coordinate transformation
+    d['lon'] = d.apply(lambda row: rc2xy(row.row,row.col)[0], axis=1)
+    d['lat'] = d.apply(lambda row: rc2xy(row.row,row.col)[1], axis=1)
+    d['area'] = d.apply(lambda row: pixel_area_km2(row.lon,row.lat), axis=1)
+    
+    # geometry 
+    d['geometry'] =d.apply(lambda row: Point(row['lon'], row['lat']), axis=1)
+    # first 2 points
+    src = None
+    return d
+
+def HWRF_extract_by_watershed(raintiff):
+    """extract flood info by watershed"""
+
+    ## zonal analysis using merged tiff and watersheds 
+    watersheds = watersheds_gdb_reader()
+    pfafid_list = watersheds.index.tolist()
+
+    headers_list = ["pfaf_id","Rain_TotalArea_km","perc_Area","MeanRain","MaxRain",]
+    output_csv = raintiff.replace(".tiff",".csv")
+    with open(output_csv,'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers_list)  
+    has_data = False
+    with open(output_csv, 'a') as f:
+        writer = csv.writer(f)
+        for the_pfafid in pfafid_list:
+            test_json = json.loads(gpd.GeoSeries([watersheds.loc[the_pfafid,'geometry']]).to_json())
+            if test_json['features'][0]['geometry'] == None:
+                continue
+            data_points = HWRF_extract_by_mask(test_json, raintiff)
+                # write summary to a csv file
+            if (not data_points.empty):
+                HWRF_TotalArea_km = data_points['area'].sum()                
+                HWRF_perc_Area = HWRF_TotalArea_km/watersheds.loc[the_pfafid]['area_km2']*100
+                HWRF_MeanRain = data_points['intensity'].mean()
+                HWRF_MaxRain = data_points['intensity'].max() 
+                results_list = [the_pfafid,HWRF_TotalArea_km,HWRF_perc_Area,HWRF_MeanRain,HWRF_MaxRain]
+                writer.writerow(results_list)
+                has_data=True
+    # has_data, move file to the right locaition
+    # no_data, delete all the file
+    if has_data:
+        shutil.move(output_csv,settings.HWRF_SUM_DIR)
+        shutil.move(raintiff,settings.HWRF_IMG_DIR)
+        os.remove(raintiff.replace(".tiff",".vrt"))
+    else:
+        os.remove(raintiff)
+        os.remove(output_csv)
+        os.remove(raintiff.replace(".tiff",".vrt"))
+        logging.info("no data: " + output_csv)
+
+    return [output_csv, has_data]
+
 def HWRF_cron():
     """ main cron script"""
     
@@ -164,14 +252,12 @@ def HWRF_cron():
             continue
         logging.info("processing " + key)
         newtiff = process_rain(key,a_list)
-        print(newtiff)
-        #logging.info("processing " + newtiff)
-        #[hwrfcsv,dataflag] = HWRF_extract_by_watershed(newtiff)
-        # if not dataflag:
-        #     logging.info("no data: " + hwrfcsv)
-        #     continue
-        #logging.info("generated: " + hwrfcsv)
-        #os.chdir(scriptdir)
+        logging.info("processing " + newtiff)
+        [hwrfcsv,dataflag] = HWRF_extract_by_watershed(newtiff)
+        if not dataflag:
+            logging.info("no data: " + hwrfcsv)
+            continue
+        logging.info("generated: " + hwrfcsv)
         
         # run MoM update
         #testdate = key
