@@ -1,0 +1,2 @@
+HWRF_Area_wt,HWRF_Area_Min_pt,HWRF_Area_max_pt,HWRF_percArea_wt,HWRF_percArea_Minpt,HWRF_percArea_Maxpt,HWRF_MeanRain_minwt,HWRF_MeanRain_increment,HWRF_MeanRain_Minpt,HWRF_MeanRain_Maxpt,HWRF_MaxRain_minwt,HWRF_MaxRain_increment,HWRF_MaxRain_Minpt,HWRF_MaxRain_Maxpt
+1000,1,10,5,1,10,2,0.5,1,10,4,1,1,10
