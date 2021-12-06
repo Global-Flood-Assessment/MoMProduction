@@ -260,8 +260,8 @@ def HWRF_cron():
         logging.info("generated: " + hwrfcsv)
         
         # run MoM update
-        #testdate = key
-        #update_HWRF_MoM(testdate,GFMS,GLoFAS,HWRFsummary,HWRFmom)
+        testdate = key
+        update_HWRF_MoM(testdate)
 
 
     os.chdir(settings.BASE_DIR)

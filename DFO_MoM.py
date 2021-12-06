@@ -14,6 +14,7 @@ import numpy as np
 
 import settings
 from utilities import read_data
+from HWRF_MoM import update_HWRF_MoM
 
 def mofunc_dfo(row):
     if row['Severity'] > 0.8 or row['Hazard_Score'] > 80:
@@ -40,6 +41,11 @@ def update_DFO_MoM(adate):
         return 
 
     # check MOMOutput
+    hhs = ['00',"06","12","18"]
+    for hh0 in hhs:
+        MOMOutput=os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}{}HWRFUpdated.csv'.format(adate,hh0))
+        if not os.path.exists(MOMOutput):
+            update_HWRF_MoM(adate+hh0)
     MOMOutput=os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}{}HWRFUpdated.csv'.format(adate,hh))
 
     weightage = read_data(os.path.join(settings.BASE_DATA_DIR,'DFO_Weightage.csv'))
@@ -138,7 +144,7 @@ def update_DFO_MoM(adate):
 
 def main():
 
-    testdate = "20211203"
+    testdate = "20211204"
     update_DFO_MoM(testdate)
 
 
