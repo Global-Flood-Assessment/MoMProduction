@@ -62,7 +62,14 @@ It performs the following taks:
 ## 5. Folder structures  
 Folder structures is defined in production.cfg, the default one is listed. Modify [general],[processing_dir], [products_dir] to change the locations.     
 
-Processing folder holds the downloaded data and intermediate outputs, the minimum required free diskspace for data processing is 20G. All the contents can be deleted periodically to save the disk space. The processed data is usually archived daily as a zip, such as gfms_20211202.zip in its corresponding processing folder. For DFO/VIIRS data, setting storage save flag to true in production.cfg deletes the downloaded data immediately after the processing. 
+Processing folder holds the downloaded data and intermediate outputs, the minimum required free diskspace for data processing is 20G. All the contents can be deleted periodically to save the disk space. The processed data is usually archived daily as a zip, such as gfms_20211202.zip in its corresponding processing folder. For DFO/VIIRS data, setting storage save flag to False in production.cfg deletes the downloaded data immediately after the processing.
+``` 
+production.cfg:
+
+[storage]
+dfo_save: True
+viirs_save: True
+```
 ```
 MoM
 ├── Processing
@@ -93,4 +100,31 @@ MoM
         └── VIIRS_summary
 ```
 
+## 6. Processing modules & data
 
+```
+MoM_run.py 
+GFMS_tool.py
+GFMS_MoM.py
+HWRF_tool.py
+HWRF_MoM.py
+DFO_tool.py
+DFO_MoM.py
+VIIRS_tool.py
+VIIRS_MoM.py
+
+settings.py
+utilities.py
+initialize.py
+```
+The data required is in data folder:
+```
+data
+├── Admin0_1_union_centroid.csv
+├── Attributes.csv
+├── DFO_Weightage.csv
+├── GFMS_Weightage.csv
+├── HWRF_Weightage.csv
+├── Resilience_Index.csv
+└── VIIRS_Weightage.csv
+```
