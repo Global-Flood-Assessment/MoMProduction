@@ -42,10 +42,10 @@ def update_HWRF_MoM(adate):
     
     #hwrf_sum may not have
     Final_Attributes_csv = os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}HWRFUpdated.csv'.format(adate))
-    Attributes_Clean_csv = os.path.join(settings.HWRF_SUM_DIR,'Attributes_Clean_{}HWRFUpdated.csv'.format(adate))
+    Attributes_Clean_csv = os.path.join(settings.HWRF_MOM_DIR,'Attributes_Clean_{}HWRFUpdated.csv'.format(adate))
 
     #already processed
-    if (os.path.exists(Final_Attributes_csv) and (Attributes_Clean_csv)):
+    if (os.path.exists(Final_Attributes_csv) and os.path.exists(Attributes_Clean_csv)):
         print('already processed: ',adate)
         return 
     
