@@ -99,7 +99,6 @@ def flood_severity(GFMS_Table,GloFas_Table,adate):
                         row[20]]
                 GloFas_w_score.writerow(write)
                 errorfile.writerow([row[0], row[1], row[14], 'Error'])
-                error_flag = True
                 row_count = row_count + 1
             elif float(row[12]) > 3 or float(row[12]) < 0:
                 error = "Alert less than 0 or greater than 3 is encountered"
