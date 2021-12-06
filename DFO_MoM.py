@@ -35,7 +35,7 @@ def update_DFO_MoM(adate):
     Attributes_Clean_csv = os.path.join(settings.DFO_MOM_DIR, 'Attributes_Clean_{}{}MOM+DFOUpdated.csv'.format(adate,hh))
 
     #already processed
-    if (os.path.exists(Final_Attributes_csv) and (Attributes_Clean_csv)):
+    if (os.path.exists(Final_Attributes_csv) and os.path.exists(Attributes_Clean_csv)):
         print('already processed: ',adate)
         return 
 

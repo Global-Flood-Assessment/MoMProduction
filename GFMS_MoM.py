@@ -25,7 +25,7 @@ def flood_severity(GFMS_Table,GloFas_Table,adate):
     Attributes_Clean_csv = os.path.join(settings.GFMS_MOM_DIR,'Attributes_Clean_{}.csv'.format(adate))
     
     #already processed
-    if (os.path.exists(Final_Attributes_csv) and (Attributes_Clean_csv)):
+    if (os.path.exists(Final_Attributes_csv) and os.path.exists(Attributes_Clean_csv)):
         #print('already processed: ',adate)
         return 
     

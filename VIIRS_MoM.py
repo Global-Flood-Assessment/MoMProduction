@@ -47,7 +47,7 @@ def update_VIIRS_MoM(adate):
     Attributes_Clean_csv = os.path.join(settings.VIIRS_MOM_DIR, Attributes_Clean_csv)
     
     #already processed
-    if (os.path.exists(Final_Attributes_csv) and (Attributes_Clean_csv)):
+    if (os.path.exists(Final_Attributes_csv) and os.path.exists(Attributes_Clean_csv)):
         print('already processed: ',adate)
         return 
 
