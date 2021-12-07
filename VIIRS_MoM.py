@@ -126,9 +126,23 @@ def update_VIIRS_MoM(adate):
 
     return
 
+def batchrun_VIIRS_MoM():
+    '''run VIIRS in batchmode'''
+
+    alist = os.listdir(settings.VIIRS_SUM_DIR)
+    alist.sort()
+    for item in alist:
+        if not '.csv' in item:
+            continue
+        datestr = item[:-4].split('_')[-1]
+        print('Processing: ', datestr)
+        update_VIIRS_MoM(datestr)
+
+
 def main():
-    testdate = '20211203'
-    update_VIIRS_MoM(testdate)
+    #testdate = '20211203'
+    #update_VIIRS_MoM(testdate)
+    batchrun_VIIRS_MoM()
 
 if __name__ == "__main__":
     main()
