@@ -141,12 +141,24 @@ def update_DFO_MoM(adate):
 
     return
 
+def batchrun_DFO_MoM():
+    '''run dfo mom in a batch'''
+
+    # check DFO summary folder
+    alist = os.listdir(settings.DFO_SUM_DIR)
+    alist.sort()
+    for item in alist:
+        if not '.csv' in item:
+            continue
+        #DFO_20210121.csv
+        datastr = item[:-4].split('_')[1]
+        update_DFO_MoM(datastr)
 
 def main():
 
     testdate = "20211204"
-    update_DFO_MoM(testdate)
-
+    #update_DFO_MoM(testdate)
+    batchrun_DFO_MoM()
 
 if __name__ == "__main__":
     main()
