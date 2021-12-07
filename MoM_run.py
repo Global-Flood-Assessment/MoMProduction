@@ -22,6 +22,9 @@ import logging
 from settings import *
 
 from GFMS_tool import GFMS_cron
+from HWRF_tool import HWRF_cron
+from DFO_tool import DFO_cron
+from VIIRS_tool import VIIRS_cron
 
 def _getParser():
     parser = argparse.ArgumentParser(description=prolog,epilog=epilog,
@@ -36,6 +39,14 @@ def run_job(cronjob):
     logging.info("run " + cronjob)
     if cronjob == "GFMS":
         GFMS_cron()
+    elif cronjob == "HWRF":
+        HWRF_cron()
+    elif cronjob == "DFO":
+        DFO_cron()
+    elif cronjob == "VIIRS":
+        VIIRS_cron()
+    else:
+        return
 
 def main():
     """execute momjob"""
