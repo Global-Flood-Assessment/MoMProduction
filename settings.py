@@ -55,6 +55,9 @@ HWRF_SUM_DIR = os.path.join(HWRF_DIR,"HWRF_summary")
 HWRF_IMG_DIR = os.path.join(HWRF_DIR,"HWRF_image")
 HWRF_MOM_DIR = os.path.join(HWRF_DIR,"HWRF_MoM")
 
+# final product
+FINAL_MOM = os.path.join(PRODUCT_DIR,config.get('products_dir', 'FINAL'))
+
 # config watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')
 WATERSHED_SHP = os.path.join(WATERSHED_DIR, "Watershed_pfaf_id.shp")

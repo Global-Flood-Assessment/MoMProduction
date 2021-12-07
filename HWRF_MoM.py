@@ -573,11 +573,91 @@ def update_HWRFMoM_DFO_VIIRS(adate):
     
     return
 
+def final_alert_pdc(adate):
+    """final alert"""
+
+    fAlert = 'Final_Attributes_{}HWRF+MOM+DFO+VIIRSUpdated_PDC.csv'.format(adate)
+    fAlert = os.path.join(settings.FINAL_MOM,fAlert)
+    if os.path.exists(fAlert):
+        #print(fAlert)
+        return
+    
+    # first find the hwrf hour output
+    hwrfh_list = glob.glob(os.path.join(settings.HWRF_MOM_DIR, "Final*.csv"))
+    #Final_Attributes_2021102800HWRF+20211028DFO+20211027VIIRSUpdated.csv
+    matching = [s for s in hwrfh_list if adate+"HWRF+" in s]
+    if len(matching)<1:
+        print("not found " + adate)
+        return
+    else:
+        print(matching[0])
+
+    aAlert = matching[0]
+    # generate string from the previous day
+    # turn the datestr into a real date
+    datestr = adate[:-2]
+    hh = adate[-2:]
+    da = datetime.strptime(datestr,"%Y%m%d")
+    pda = da - timedelta(days=1)
+    pdatestr = pda.strftime("%Y%m%d")
+    # pdate
+    pdate = pdatestr + hh
+    matching = [s for s in hwrfh_list if pdate+"HWRF+" in s]
+    # no previous date
+    if len(matching)<1:
+        # shall call the function to generate it
+        print("not found " + pdate)
+        return
+    else:
+        print(matching[0])
+
+    pAlert=matching[0]
+
+    mapping = {'Information': 1, 'Advisory': 2, 'Watch':3, 'Warning':4}
+    PA=read_data(pAlert)
+    CA=read_data(aAlert)
+    CA['Status']=""
+    PA=PA.replace({'Alert': mapping})
+    CA=CA.replace({'Alert':mapping})
+
+    pfaf_ID=set(CA['pfaf_id'].tolist())
+
+    for i in pfaf_ID:
+        #print(i)
+        if i in PA.values:
+            PAlert=PA.loc[PA['pfaf_id']==i,'Alert'].item()
+        else:
+            PAlert=5
+        CAlert=CA.loc[CA['pfaf_id']==i,'Alert'].item()
+        if PAlert ==5:
+            CA.loc[CA['pfaf_id']==i,'Status']='New'
+        elif PAlert==CAlert:
+            CA.loc[CA['pfaf_id']==i,'Status']='Continued'
+        elif (CAlert>PAlert):
+            CA.loc[CA['pfaf_id']==i,'Status']='Upgraded'
+        elif (CAlert<PAlert) & (PAlert!=5):
+            CA.loc[CA['pfaf_id']==i,'Status']='Downgraded'
+    
+    mapping = {1:'Information', 2:'Advisory', 3:'Watch', 4:'Warning'}
+    CA=CA.replace({'Alert':mapping})
+
+    CA=CA.drop(['Admin0','Admin1','ISO','Resilience_Index',' NormalizedLackofResilience '],axis=1)
+    Union_Attributes=pd.read_csv(os.path.join(settings.BASE_DATA_DIR,'Admin0_1_union_centroid.csv'),encoding='Windows-1252')
+    PDC_Alert= pd.merge(Union_Attributes, CA, on='pfaf_id', how='inner')
+    #print(PDC_Alert)
+    PDC_Alert.drop(PDC_Alert.index[(PDC_Alert['DFOTotal_Score']=='') & (PDC_Alert['MOM_Score']=='') & (PDC_Alert['CentroidY']>50)], inplace=True)
+    PDC_Alert=PDC_Alert.drop(['FID_x', 'FID_y'],axis=1)
+    PDC_Alert.to_csv(fAlert,encoding='Windows-1252')
+    logging.info('generated final alert:'+ fAlert)
+
+    return
+
 def main():
     # run batch mode
     testdate = '2021120406'
     update_HWRF_MoM(testdate)
     update_HWRFMoM_DFO_VIIRS(testdate)
+    final_alert_pdc(testdate)
 
 if __name__ == "__main__":
     main()   
