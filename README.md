@@ -65,17 +65,21 @@ It performs the following taks:
 
 ## 4. Setup cron-job  
 
-## 5. Folder structures  
-Folder structures is defined in production.cfg, the default one is listed. Modify [general],[processing_dir], [products_dir] to change the locations.     
+## 5. Storages requirements 
+The minimum required free diskspace for data processing is 20G. 
 
-Processing folder holds the downloaded data and intermediate outputs, the minimum required free diskspace for data processing is 20G. All the contents can be deleted periodically to save the disk space. The processed data is usually archived daily as a zip, such as gfms_20211202.zip in its corresponding processing folder. For DFO/VIIRS data, setting storage save flag to False in production.cfg deletes the downloaded data immediately after the processing.
+Daily processing jobs generate less than 3.0Gb data, includes both the downloaded data and products.  
+
+Processing folder holds the downloaded data and intermediate outputs, all the contents under processing can be deleted periodically to save the disk space. The processed data is usually archived daily as a zip, such as gfms_20211202.zip in its corresponding folder. For DFO/VIIRS data, setting storage save flag to False in production.cfg deletes the downloaded data immediately after the processing, it saves a little more than 2.0Gb (DFO: 2Gb, VIIRS: around 200Mb). 
 ``` 
 production.cfg:
 
 [storage]
-dfo_save: True
-viirs_save: True
+dfo_save: False 
+viirs_save: False 
 ```
+## 5. Folder structures 
+Folder structures is defined in production.cfg, the default one is listed. Modify [general],[processing_dir], [products_dir] to change the locations. 
 ```
 MoM
 ├── Processing
