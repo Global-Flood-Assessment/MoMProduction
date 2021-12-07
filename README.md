@@ -15,6 +15,13 @@ conda config --set channel_priority strict
 conda config --show channels
 ```
 ### 1.2 Install Python Packages
+```
+conda install --file packagelist.txt 
+```
+If an environment is prefered:
+```
+conda create --name myenv --file packagelist.txt
+```
 ### 1.3 Other software requirements
 Check if zip, wget, gdal are installed.  
 Install the packages if not available:
