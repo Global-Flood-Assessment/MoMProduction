@@ -26,6 +26,10 @@ from HWRF_tool import HWRF_cron
 from DFO_tool import DFO_cron
 from VIIRS_tool import VIIRS_cron
 
+from HWRF_MoM import batchrun_HWRF_MoM
+from DFO_MoM import batchrun_DFO_MoM
+from VIIRS_MoM import batchrun_VIIRS_MoM
+
 def _getParser():
     parser = argparse.ArgumentParser(description=prolog,epilog=epilog,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -41,10 +45,13 @@ def run_job(cronjob):
         GFMS_cron()
     elif cronjob == "HWRF":
         HWRF_cron()
+        batchrun_HWRF_MoM()
     elif cronjob == "DFO":
         DFO_cron()
+        batchrun_DFO_MoM()
     elif cronjob == "VIIRS":
         VIIRS_cron()
+        batchrun_VIIRS_MoM()
     else:
         return
 
