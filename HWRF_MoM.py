@@ -652,12 +652,48 @@ def final_alert_pdc(adate):
 
     return
 
+def batchrun_HWRF_MoM():
+    """run hwrf in batch mode"""
+
+    # collect all dates
+    # first scan hwrf_summary folder
+    datelist = []
+    for entry in sorted(os.listdir(settings.HWRF_SUM_DIR)):
+        if "rainfall.csv" in entry:
+            testdate = entry.split(".")[1].replace('rainfall',"")
+            datelist.append(testdate)
+    
+    # scan raw data folder
+    for entry in sorted(os.listdir(settings.HWRF_PROC_DIR)):
+        #hwrf.2021092112rainfall.zip
+        if ".zip" in entry:
+            testdate = entry.split(".")[1].replace('rainfall',"")
+            datelist.append(testdate)
+    
+    # also scan mom folder
+    for entry in sorted(os.listdir(settings.HWRF_MOM_DIR)):
+        if "Final" in entry and 'HWRFUpdated' in entry:
+            testdate = entry.split("_")[2].replace('HWRFUpdated.csv','')
+            datelist.append(testdate)
+
+    list_set = set(datelist)
+    unique_dates = (list(list_set))
+    unique_dates.sort()
+
+    for testdate in unique_dates:
+        update_HWRF_MoM(testdate)
+        update_HWRFMoM_DFO_VIIRS(testdate)
+        final_alert_pdc(testdate)
+
+    return
+    
 def main():
     # run batch mode
-    testdate = '2021120406'
-    update_HWRF_MoM(testdate)
-    update_HWRFMoM_DFO_VIIRS(testdate)
-    final_alert_pdc(testdate)
+    # testdate = '2021120406'
+    # update_HWRF_MoM(testdate)
+    # update_HWRFMoM_DFO_VIIRS(testdate)
+    # final_alert_pdc(testdate)
+    batchrun_HWRF_MoM()
 
 if __name__ == "__main__":
     main()   
