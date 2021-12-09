@@ -364,7 +364,7 @@ def find_latest_summary(datestr, scanfolder,namepattern,hours):
         if os.path.exists(cfile):
             return [cdatestr, cfile]
     
-    return 
+    return ['','']
 
 def update_HWRFMoM_DFO_VIIRS(adate):
     """
@@ -384,8 +384,13 @@ def update_HWRFMoM_DFO_VIIRS(adate):
     # find the latest DFO, VIIRS summary
     datestr = adate[:-2]
     hourstr = adate[-2:]
+    # return '' if not found
     [dfo_date,dfo_summary] = find_latest_summary(datestr,settings.DFO_SUM_DIR,"DFO_{}.csv",hourstr)
+    if dfo_date == '':
+        return
     [viirs_date,viirs_summary] = find_latest_summary(datestr,settings.VIIRS_SUM_DIR,"VIIRS_Flood_{}.csv",hourstr)
+    if viirs_date == '':
+        return
 
     # geneate HWRF_DFO_MoM
     MOMOutput= os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}HWRFUpdated.csv'.format(adate))
