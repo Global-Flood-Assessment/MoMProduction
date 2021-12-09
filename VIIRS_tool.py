@@ -11,7 +11,6 @@
 
 import sys, os, csv, json
 import argparse
-import yaml
 import requests
 import logging
 import datetime
