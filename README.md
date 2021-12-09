@@ -102,10 +102,10 @@ Each datasets are released in difference schedules, GloFAS, DFO, VIIRS are relea
 Use [corntab](https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804) command to create/edit cron jobs. 
 Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the absolute path to the python installation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample corntab entries:  
 ```
-0 0,8,16 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
-0 1,7,13,19 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
-00 2,9,14,20 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
-00 3,10,15,21 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
+0 0,8,16 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
+0 1,7,13,19 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
+00 2,9,14,20 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
+00 3,10,15,21 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 ```
 ## 5. Storage requirements 
 The minimum required free diskspace for data processing is 20G. 
