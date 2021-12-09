@@ -1,12 +1,12 @@
-# ModeofModels Production
+# ModelofModels Production
 The following guide is tested on Ubuntu 18.04 and 20.04 LTS.  
-The current testing VM is a m1.small instance on [Jetstream clound](https://portal.xsede.org/jetstream) with 2 vcous, 4GB memory, 20GB storage with an extra 100GB volume attached.   
+The current testing VM is a m1.small instance on [Jetstream clound](https://portal.xsede.org/jetstream) with 2 vcpus, 4GB memory, 20GB storage with an extra 100GB volume attached.   
 
-**Note**: non-administor user "tester" in Ubuntu is used this guide.    
+**Note**: non-administrator user "tester" in Ubuntu is used this guide.    
 ## 1. Setup Python environment
 ### 1.1 Install Python
 Python version tested: 3.8, 3.9    
-[Miniconda](https://docs.conda.io/en/latest/miniconda.html) is recommanded.  
+[Miniconda](https://docs.conda.io/en/latest/miniconda.html) is recommended.  
 Latest release: [Miniconda3 Linux 64-bit](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh) 
 ### 1.2 Enable conda-forge channel
 After miniconda installed, the commands enable conda-forge channel  
@@ -33,7 +33,7 @@ sudo apt install gdal_bin
 ```
 git clone https://github.com/Global-Flood-Assessment/MoMProduction.git
 ```
-## 3. Ininitlize the setup
+## 3. Initialize the setup
 Please copy [sample_production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/sample_production.cfg) to **production.cfg**, or run initialize.py, it will do the copy.  
 Check production.cfg: 
 - in general section, change WORKING_DIR (base directory for downloading and processing data) and PRODUCT_DIR (base directory for the data products) if necessary;
@@ -53,11 +53,11 @@ DIRECTORY: /for_PDC
 [dfo]
 TOKEN: ???
 ```
-Ininitlize the production setup: 
+Initialize the production setup: 
 ```
 python initialize.py
 ```
-It performs the following taks:   
+It performs the following tasks:   
 - create the folder structures defined in production.cfg
 - check username/password, token in production.cfg
 - unzip watershed.shp 
@@ -100,14 +100,14 @@ sample log output
 ## 4. Setup cron jobs
 Each datasets are released in difference schedules, GloFAS, DFO, VIIRS are released once a day; GFMS are the predication data in 3-hour interval and available in advance, amd are processed along with GloFAS data. HWRF is updated every 6 six hours under certain weather conditions, there can be no HWRF data released in days. One hour interval between each job are suggested. The script for each job check if there is the new data need to be processed.  
 Use [corntab](https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804) command to create/edit cron jobs. 
-Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the abosulte path to your python instatllation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample corntab entries:  
+Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the absolute path to the python installation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample corntab entries:  
 ```
 0 0,8,16 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
 0 1,7,13,19 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
 00 2,9,14,20 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
 00 3,10,15,21 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 ```
-## 5. Storages requirements 
+## 5. Storage requirements 
 The minimum required free diskspace for data processing is 20G. 
 
 Daily processing jobs generate less than 3.0Gb data, includes both the downloaded data and products.  
