@@ -67,4 +67,8 @@ WATERSHED_SHP = os.path.join(WATERSHED_DIR, "Watershed_pfaf_id.shp")
 todays_date = date.today()
 logfile = "{year}_{month}.log".format(year=todays_date.year,month=todays_date.month)
 logfile = os.path.join(WORKING_DIR,config.get('processing_dir', 'logs'),logfile)
-logging.basicConfig(filename=logfile, format='%(asctime)s - %(module)s - %(levelname)s : %(message)s', level=logging.INFO)
+try:
+    logging.basicConfig(filename=logfile, format='%(asctime)s - %(module)s - %(levelname)s : %(message)s', level=logging.INFO)
+except:
+    pass
+

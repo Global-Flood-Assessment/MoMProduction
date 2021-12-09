@@ -26,8 +26,8 @@ from settings import *
 from utilities import watersheds_gdb_reader
 from DFO_MoM import update_DFO_MoM
 
-# for command line mode
-from progressbar import progress
+# for command line mode, no need for cron-job
+#from progressbar import progress
 
 def get_real_date(year,day_num):
     """ get the real date"""
@@ -146,14 +146,14 @@ def dfo_extract_by_watershed(vtk_file):
         # already processed, 
         return 
 
-    count = 0
+    #count = 0
     with open(summary_file, 'a') as f:
         writer = csv.writer(f)
 
         for pfaf_id in pfaf_id_list:
-            count += 1
             #print(the_aqid, count, " out of ", len(aqid_list))
-            progress(count,  len(pfaf_id_list), status='pfaf_id')
+            #count += 1
+            #progress(count,  len(pfaf_id_list), status='pfaf_id')
             # extract mask
             test_json = json.loads(geopandas.GeoSeries([watersheds.loc[pfaf_id,'geometry']]).to_json())
             # plot check
