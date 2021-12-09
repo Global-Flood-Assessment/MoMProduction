@@ -71,8 +71,13 @@ python MoM_run.py -j DFO
 python MoM_run.py -j VIIRS
 ```
 The outputs to the console are very minimal, the progress can be checked through the log file under processing/logs folder. The log is generated each month, e.g 2021_11.log, 2021_12.log.    
-## 4. Setup cron-job
+## 4. Setup cron jobs
+Each datasets are released in difference schedules, GloFAS, DFO, VIIRS are released once a day; GFMS are the predication data in 3-hour interval and available in advance, amd are processed along with GloFAS data. HWRF is updated every 6 six hours under certain weather conditions, there can be no HWRF data released in days. One hour interval between each job are suggested. The script for each job check if there is the new data need to be processed.  
+Use [corntab](https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804) command to create/edit cron jobs. 
+Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the abosulte path to your python instatllation in the crom setup.   
+```
 
+```
 ## 5. Storages requirements 
 The minimum required free diskspace for data processing is 20G. 
 
