@@ -34,7 +34,7 @@ sudo apt install gdal_bin
 git clone https://github.com/Global-Flood-Assessment/MoMProduction.git
 ```
 ## 3. Ininitlize the setup
-Please copy [sample_production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/sample_production.cfg) to **production.cfg**.  
+Please copy [sample_production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/sample_production.cfg) to **production.cfg**, or run initialize.py, it will do the copy.  
 Check production.cfg: 
 - in general section, change WORKING_DIR (base directory for downloading and processing data) and PRODUCT_DIR (base directory for the data products) if necessary;
 - in glofas section, fill in user/passwd for ftp site;  
