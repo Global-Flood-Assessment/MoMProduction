@@ -14,14 +14,12 @@ conda config --set channel_priority strict
 conda config --show channels
 ```
 ### 1.2 Install Python Packages
+Install packages by creating an environment 'mom'.
 ```
-conda install --file packagelist.txt 
+conda create --name mom --file packagelist.txt
+conda activate mom
 ```
-If an environment is prefered:
-```
-conda create --name myenv --file packagelist.txt
-```
-**Note**: virtual environment is not recommanded in prodution.  
+All the python commands after this part are running with this environment.  
 ### 1.3 Other software requirements
 Check if zip, wget, gdal are installed.  
 Install the packages if not available:
@@ -70,13 +68,42 @@ python MoM_run.py -j HWRF
 python MoM_run.py -j DFO
 python MoM_run.py -j VIIRS
 ```
-The outputs to the console are very minimal, the progress can be checked through the log file under processing/logs folder. The log is generated each month, e.g 2021_11.log, 2021_12.log.    
+The outputs to the console are very minimal, the progress can be checked through the log file under processing/logs folder. The log is generated each month, e.g 2021_11.log, 2021_12.log. 
+```
+sample log output
+2021-12-09 10:39:18,174 - MoM_run - INFO : run GFMS
+2021-12-09 10:39:33,055 - GFMS_tool - INFO : processing GLoFAS: 2021120200
+2021-12-09 10:39:34,705 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120200.csv
+2021-12-09 10:39:35,313 - GFMS_tool - INFO : processing GLoFAS: 2021120300
+2021-12-09 10:39:36,909 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120300.csv
+2021-12-09 10:39:37,514 - GFMS_tool - INFO : processing GLoFAS: 2021120400
+2021-12-09 10:39:39,112 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120400.csv
+2021-12-09 10:39:39,714 - GFMS_tool - INFO : processing GLoFAS: 2021120500
+2021-12-09 10:39:41,349 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120500.csv
+2021-12-09 10:39:41,952 - GFMS_tool - INFO : processing GLoFAS: 2021120600
+2021-12-09 10:39:43,555 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120600.csv
+2021-12-09 10:39:44,166 - GFMS_tool - INFO : processing GLoFAS: 2021120700
+2021-12-09 10:39:45,781 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120700.csv
+2021-12-09 10:39:46,389 - GFMS_tool - INFO : processing GLoFAS: 2021120800
+2021-12-09 10:39:48,042 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120800.csv
+2021-12-09 10:39:48,677 - GFMS_tool - INFO : processing GLoFAS: 2021120900
+2021-12-09 10:39:50,289 - GFMS_tool - INFO : generated: Products/GLOFAS/threspoints_2021120900.csv
+2021-12-09 10:39:53,383 - GFMS_tool - INFO : Download: Flood_byStor_2021120200.bin
+2021-12-09 10:39:53,385 - GFMS_tool - INFO : processing: Processing/gfms/Flood_byStor_2021120200.vrt
+2021-12-09 10:41:43,808 - GFMS_tool - INFO : generated: Processing/gfms/Flood_byStor_2021120200.csv
+2021-12-09 10:41:44,154 - GFMS_tool - INFO : generated: Products/GFMS/GFMS_image/Flood_byStor_2021120200.tiff
+2021-12-09 10:41:47,233 - GFMS_tool - INFO : Download: Flood_byStor_2021120203.bin
+...
+```   
 ## 4. Setup cron jobs
 Each datasets are released in difference schedules, GloFAS, DFO, VIIRS are released once a day; GFMS are the predication data in 3-hour interval and available in advance, amd are processed along with GloFAS data. HWRF is updated every 6 six hours under certain weather conditions, there can be no HWRF data released in days. One hour interval between each job are suggested. The script for each job check if there is the new data need to be processed.  
 Use [corntab](https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804) command to create/edit cron jobs. 
-Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the abosulte path to your python instatllation in the crom setup.   
+Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the abosulte path to your python instatllation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample corntab entries:  
 ```
-
+0 0,8,16 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
+0 1,7,13,19 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
+00 2,9,14,20 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
+00 3,10,15,21 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 ```
 ## 5. Storages requirements 
 The minimum required free diskspace for data processing is 20G. 
