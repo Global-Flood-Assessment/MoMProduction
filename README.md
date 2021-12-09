@@ -1,5 +1,6 @@
 # ModeofModels Production
-The following guide is tested on Ubuntu 18.04 and 20.04 LTS.
+The following guide is tested on Ubuntu 18.04 and 20.04 LTS.  
+The current testing VM is a m1.small instance on (Jetstream clound)[https://portal.xsede.org/jetstream] with 2 vcous, 4GB memory, 20GB storage with an extra 100GB volume attached.   
 ## 1. Setup Python environment
 ### 1.1 Install Python
 Python version tested: 3.8, 3.9    
@@ -25,8 +26,6 @@ conda create --name myenv --file packagelist.txt
 Check if zip, wget, gdal are installed.  
 Install the packages if not available:
 ```
-sudo apt install zip
-sudo apt install wget
 sudo apt install gdal_bin 
 ```
 
@@ -63,7 +62,16 @@ It performs the following taks:
 - check username/password, token in production.cfg
 - unzip watershed.shp 
 
-## 4. Setup cron-job  
+## 4. Test run
+All the processing jobs can be tested in the following orders. It may take several hours to finish, it produces data products from the latest several days.
+```
+python MoM_run.py -j GFMS
+python MoM_run.py -j HWRF
+python MoM_run.py -j DFO
+python MoM_run.py -j VIIRS
+```
+The outputs to the console are very minimal, the progress can be checked through the log file under processing/logs folder. The log is generated each month, e.g 2021_11.log, 2021_12.log.    
+## 4. Setup cron-job
 
 ## 5. Storages requirements 
 The minimum required free diskspace for data processing is 20G. 
