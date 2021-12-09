@@ -1,6 +1,8 @@
 # ModeofModels Production
 The following guide is tested on Ubuntu 18.04 and 20.04 LTS.  
 The current testing VM is a m1.small instance on [Jetstream clound](https://portal.xsede.org/jetstream) with 2 vcous, 4GB memory, 20GB storage with an extra 100GB volume attached.   
+
+**Note**: non-administor user "tester" in Ubuntu is used this guide.    
 ## 1. Setup Python environment
 ### 1.1 Install Python
 Python version tested: 3.8, 3.9    
