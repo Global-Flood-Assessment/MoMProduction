@@ -2,7 +2,7 @@
 The following guide is tested on Ubuntu 18.04 and 20.04 LTS.  
 The current testing VM is a m1.small instance on [Jetstream clound](https://portal.xsede.org/jetstream) with 2 vcpus, 4GB memory, 20GB storage with an extra 100GB volume attached.   
 
-**Note**: non-administrator user "tester" in Ubuntu is used this guide.    
+**Note**: A non-administrator user "tester" in Ubuntu is used this guide. Please update the path in cron-job examples with the right user name used in your installation.   
 ## 1. Setup Python environment
 ### 1.1 Install Python
 Python version tested: 3.8, 3.9    
