@@ -21,7 +21,7 @@ Install packages by creating an environment 'mom'.
 conda create --name mom --file packagelist.txt
 conda activate mom
 ```
-All the python commands after this part are running with this environment.  
+All the python commands after this part are running in this environment.  
 ### 1.3 Other software requirements
 Check if zip, wget, gdal are installed.  
 Install the packages if not available:
