@@ -54,13 +54,16 @@ def check_data_online(adate):
     # https://floodlight.ssec.wisc.edu/composite/RIVER-FLDglobal-composite1_*_000000.part*.tif
     
     baseurl = settings.config.get("viirs",'HOST')
-    testurl = os.path.join(baseurl,'RIVER-FLDglobal-composite_{}_000000.part001.tif'.format(adate))
-    r = requests.head(testurl)
-    if r.status_code == 404:
-        online = False
-    else:
-        online = True
-    
+    testurl_t = 'RIVER-FLDglobal-composite_{}_000000.part00{}.tif'
+    for i in [1,2,3,4,5]:
+        testurl = os.path.join(baseurl, testurl_t.format(adate,str(i)))
+        r = requests.head(testurl)
+        if r.status_code == 404:
+            online = False
+        else:
+            online = True
+            break
+
     return online
 
 def build_tiff(adate):
