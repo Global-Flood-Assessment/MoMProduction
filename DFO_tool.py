@@ -297,6 +297,8 @@ def DFO_cron():
         logging.info("no new data to process!")
         sys.exit(0)    
     
+    print(datelist)
+    sys.exit(0)
     for key in datelist:
         logging.info("download: " + key)
         dfo_download(key)
