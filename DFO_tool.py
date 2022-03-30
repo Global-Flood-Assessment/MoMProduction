@@ -29,6 +29,9 @@ from DFO_MoM import update_DFO_MoM
 # for command line mode, no need for cron-job
 #from progressbar import progress
 
+# total number of hdf files
+DFO_TOTAL_TILES = 223
+
 def get_real_date(year,day_num):
     """ get the real date"""
     
@@ -47,6 +50,7 @@ def check_status(adate):
     
     return processed
 
+
 def get_hosturl():
     """ get the host url"""
     baseurl = config.get('dfo','HOST')
@@ -60,7 +64,6 @@ def generate_procesing_list():
     hosturl = get_hosturl()   
     reqs = requests.get(hosturl)
     soup = BeautifulSoup(reqs.text,"html.parser")
-    
     cur_year = hosturl[-4:]
     datelist = {}
     for link in soup.find_all('a'):
@@ -213,7 +216,12 @@ def DFO_process(folder,adate):
         HDF = entry
         hdffiles.append(HDF)
     
-        # one step one image operation
+    # check the number of files
+    if len(hdffiles) < DFO_TOTAL_TILES:
+        logging.warning('Not enough files: ' + folder)
+        return
+
+    # one step one image operation
     vrt_list = []
     for flood in floodlayer:
         subfolder = flood.replace(" ","_")
@@ -252,7 +260,7 @@ def DFO_process(folder,adate):
             #gdalcmd = f'gdaladdo -r average {tiff} 2 4 8 16 32'
             #os.system(gdalcmd)
         
-        # delete tiff folder
+        #delete tiff folder
         if os.path.exists(subfolder):
             shutil.rmtree(subfolder)   
 
@@ -293,12 +301,12 @@ def DFO_cron():
     """cron job to process DFO"""
 
     datelist = generate_procesing_list()
+     
     if len(datelist) == 0:
         logging.info("no new data to process!")
         sys.exit(0)    
     
-    print(datelist)
-    sys.exit(0)
+    
     for key in datelist:
         logging.info("download: " + key)
         dfo_download(key)
@@ -309,7 +317,7 @@ def DFO_cron():
         # datelist[key]: real date
         DFO_process(key,datelist[key])
         # run DFO_MoM
-        update_DFO_MoM(datelist[key])
+        #update_DFO_MoM(datelist[key])
         logging.info("processing finished: " + key)
 
     return
