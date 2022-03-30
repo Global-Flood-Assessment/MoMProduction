@@ -317,7 +317,7 @@ def DFO_cron():
         # datelist[key]: real date
         DFO_process(key,datelist[key])
         # run DFO_MoM
-        #update_DFO_MoM(datelist[key])
+        update_DFO_MoM(datelist[key])
         logging.info("processing finished: " + key)
 
     return

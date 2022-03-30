@@ -427,7 +427,7 @@ def GFMS_cron():
     #processing_dates = ['2021120200']
     GFMS_processing(processing_dates)
 
-def GFMS_cron_fix(adate):
+def GFMS_fixdate(adate):
     """run cron job"""
     # cron steup cd ~/ModelofModels/data && python datatool.py --cron
     # run every three hours
@@ -438,6 +438,8 @@ def GFMS_cron_fix(adate):
     #processing_dates = GloFAS_process()
     # check if GMS data is available 
     #processing_dates = ['2020061800','2020061900','2020062000']
+    if len(adate) == 8:
+        adate = adate + "00"
     processing_dates = [adate]
     binhours = ["00","03","06","09","12","15","18","21"]
     for data_date in processing_dates:
