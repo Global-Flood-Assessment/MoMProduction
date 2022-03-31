@@ -57,7 +57,10 @@ def update_HWRF_MoM(adate):
     # first check if file exists
     if not os.path.exists(gfms_sum):
         print("not found: ",gfms_sum)
-        return
+        print("call fix day:", adate[:8])
+        from GFMS_tool import GFMS_fixdate
+        GFMS_fixdate(adate[:8])
+
     if not os.path.exists(glofas_sum):
         print("not found: ", glofas_sum)
         return
