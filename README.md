@@ -123,6 +123,7 @@ Sample cron setup, it assumes the miniconda is installed under /home/tester/mini
 00 2,9,14,20 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
 00 3,10,15,21 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 ```
+**Notes:** Please referece [crotab_list.txt](https://github.com/Global-Flood-Assessment/MoMProduction/blob/dev/crontab_list.txt) for the latest cron setup. 
 ## 5. Storage requirements 
 The minimum required free disk space for data processing is 20G. 
 
