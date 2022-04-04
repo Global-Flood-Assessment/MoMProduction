@@ -18,3 +18,26 @@ DFO : 20220403 : Attributes_Clean_2022040318MOM+DFOUpdated.csv
 VIIRS : 20220402 : Attributes_clean_2022040218MOM+DFO+VIIRSUpdated.csv
 FINAL : 20220403 : Final_Attributes_2022040306HWRF+MOM+DFO+VIIRSUpdated_PDC.csv
 ```
+**Notes:** in html email, the warning item is marked by red
+
+## Send email
+The current code use [sendgrid](https://sendgrid.com/) free account, install [sendgrid python client](https://github.com/sendgrid/sendgrid-python/) under the virtual environment running MoM code. 
+```
+pip install sendgrid
+```
+## Modify configuration:
+monitor_config.cfg
+```
+[EMAIL]
+from_email = someone@example.com
+to_emails = someone@example.com
+SENDGRID_API_KEY = xxxx
+```
+## Test
+run "python monitor.py", an email shall be recevied in severla minature with the status report.
+
+## Add to Crobtab
+If the server is on UTC (+0000) time, this setup will send a report at 8:30 and 4:30 EDT.
+```
+30 12,20 * * * cd /home/geogateway/MoMProduction/monitor && /home/geogateway/miniconda3/envs/mom/bin/python monitor.py  >/dev/null 2>&1
+```
