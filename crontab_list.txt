@@ -1,7 +1,7 @@
 
-0 1,4,8,16 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
-30 2,7,13,19 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
-30 3,10,23 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
-30 5,12,17 * * * cd /home/tester/MoMProduction && home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
+0 1,4,8,16 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
+30 2,7,13,19 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
+30 3,10,23 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
+30 5,12,17 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 
 
