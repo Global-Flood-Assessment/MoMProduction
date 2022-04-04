@@ -53,7 +53,8 @@ def writeStatus(statusdict, statusflag):
         if statusdict[f'{item}_data_status'] != 'normal':
             liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
         else:
-            liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
+            liststr += "<li>"+ textstr + "</li>"
+
     htmlstr += f"<ul>{liststr}</ul>"
     htmlstr += "<h4>MoM Output</h4>"
     
@@ -63,7 +64,8 @@ def writeStatus(statusdict, statusflag):
         if statusdict[f'{item}_MoM_status'] != 'normal':
             liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
         else:
-            liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
+            liststr += "<li>"+ textstr + "</li>"
+
     htmlstr += f"<ul>{liststr}</ul>"
 
     with open(htmlfile,"w") as f:
