@@ -1,11 +1,15 @@
 """
     monitor.py
         -- a simple monitor service
+
+    notes on email:
+        -- https://sendgrid.com/ free account
+        -- https://github.com/sendgrid/sendgrid-python/
+            pip install sendgrid
 """
 
 import os,sys, glob
 import re
-from turtle import ht
 
 current = os.path.dirname(os.path.realpath(__file__))
 
@@ -70,7 +74,39 @@ def writeStatus(statusdict, statusflag):
 
     with open(htmlfile,"w") as f:
         f.write(htmlstr)
+    
+    return htmlstr
 
+def sendEmail(statusreport,statusflag):
+    """send email"""
+    
+    import configparser
+    config = configparser.ConfigParser()
+    config.read('monitor_config.cfg')
+    from_email = config['EMAIL']['from_email']
+    to_emails = config['EMAIL']['to_emails']
+    sg_key = config['EMAIL']['SENDGRID_API_KEY']
+
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail
+
+    subject = "Operation: " + statusflag
+
+    message = Mail(
+        from_email=from_email,
+        to_emails = to_emails,
+        subject = subject,
+        html_content = statusreport )
+    
+    try:
+        sg = SendGridAPIClient(sg_key)
+        reponse = sg.send(message)
+    except Exception as e:
+        print(e.message)
+    
+    return
+
+    
 
 def checkService():
     """check service status"""
@@ -114,7 +150,9 @@ def checkService():
             operation_status = "warning"
 
     #print(status)
-    writeStatus(status, operation_status)
+    msg = writeStatus(status, operation_status)
+    # sedn email with 
+    sendEmail(msg,operation_status)
 
 def main():
     checkService()
