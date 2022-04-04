@@ -32,7 +32,11 @@ conda config --add channels conda-forge
 conda config --set channel_priority strict
 conda config --show channels
 ```
-### 1.2 Install Python Packages
+### 1.2 Clone MoMProduction repo:
+```
+git clone https://github.com/Global-Flood-Assessment/MoMProduction.git
+```
+### 1.3 Install Python Packages
 Install packages by creating an environment 'mom'.
 ```
 conda create --name mom --file packagelist.txt
@@ -45,12 +49,7 @@ Install the packages if not available:
 ```
 sudo apt install gdal_bin 
 ```
-
-## 2. Clone MoMProduction repo:
-```
-git clone https://github.com/Global-Flood-Assessment/MoMProduction.git
-```
-## 3. Initialize the setup
+## 2. Initialize the setup
 Please copy [sample_production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/sample_production.cfg) to **production.cfg**, or run initialize.py, it will do the copy.  
 Check production.cfg: 
 - in general section, change WORKING_DIR (base directory for downloading and processing data) and PRODUCT_DIR (base directory for the data products) if necessary;
@@ -79,7 +78,7 @@ It performs the following tasks:
 - check username/password, token in production.cfg
 - unzip watershed.shp 
 
-## 4. Test run
+## 3. Test run
 All the processing jobs can be tested in the following orders. It may take several hours to finish, it produces data products from the latest several days.
 ```
 python MoM_run.py -j GFMS
