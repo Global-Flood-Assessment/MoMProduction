@@ -34,7 +34,7 @@ to_emails = someone@example.com
 SENDGRID_API_KEY = xxxx
 ```
 ## Test
-run "python monitor.py", an email shall be recevied in severla minature with the status report.
+run **python monitor.py**, an email shall be recevied in severla minature with the status report.
 
 ## Add to Crobtab
 If the server is on UTC (+0000) time, this setup will send a report at 8:30 and 4:30 EDT.
