@@ -23,7 +23,7 @@ import rasterio
 from rasterio.mask import mask
 
 from settings import *
-from utilities import watersheds_gdb_reader
+from utilities import watersheds_gdb_reader, from_today
 from DFO_MoM import update_DFO_MoM
 
 # for command line mode, no need for cron-job
@@ -31,6 +31,7 @@ from DFO_MoM import update_DFO_MoM
 
 # total number of hdf files
 DFO_TOTAL_TILES = 223
+DFO_MINIMUM_TILES = 221
 
 def get_real_date(year,day_num):
     """ get the real date"""
@@ -217,10 +218,14 @@ def DFO_process(folder,adate):
         hdffiles.append(HDF)
     
     # check the number of files
-    if len(hdffiles) < DFO_TOTAL_TILES:
-        logging.warning('Not enough files: ' + folder)
-        return
-
+    # need check the date first
+    ddays = from_today(adate)
+    # for the previous day, just process what ever it has
+    if ddays >= 0:
+        if len(hdffiles) < DFO_TOTAL_TILES:
+            logging.warning('Not enough files: ' + folder)
+            return
+    
     # one step one image operation
     vrt_list = []
     for flood in floodlayer:
