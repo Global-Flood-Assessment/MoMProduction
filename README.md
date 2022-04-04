@@ -1,8 +1,25 @@
 # ModelofModels Production
 The following guide is tested on Ubuntu 18.04 and 20.04 LTS.  
-The current testing VM is a m1.small instance on [Jetstream clound](https://portal.xsede.org/jetstream) with 2 vcpus, 4GB memory, 20GB storage with an extra 100GB volume attached.   
+The current testing VM is a m1.small instance on [Jetstream cloud](https://portal.xsede.org/jetstream) with 2 vcpus, 4GB memory, 20GB storage with an extra 100GB volume attached.   
 
-**Note**: A non-administrator user "tester" in Ubuntu is used this guide. Please update the path in cron-job examples with the right user name for your installation.   
+**Note**: A non-administrator user "tester" in Ubuntu is used this guide. Please update the path in cron-job examples with the right user name for your installation. 
+
+## 0. Timezone setup
+Upstream data are produced by agencies across the world, UTC time zone is recommended.  
+In Ubuntu, set timezone to UTC: 
+```
+sudo timedatectl set-timezone UTC
+```
+And run "timedatectl" to check: 
+```
+                      Local time: Mon 2022-04-04 01:45:14 UTC
+                  Universal time: Mon 2022-04-04 01:45:14 UTC
+                        RTC time: Mon 2022-04-04 01:45:14
+                       Time zone: UTC (UTC, +0000)
+       System clock synchronized: yes
+systemd-timesyncd.service active: yes
+                 RTC in local TZ: no
+```
 ## 1. Setup Python environment
 ### 1.1 Install Python
 Python version tested: 3.8, 3.9    
@@ -108,7 +125,7 @@ Sample cron setup, it assumes the miniconda is installed under /home/tester/mini
 00 3,10,15,21 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 ```
 ## 5. Storage requirements 
-The minimum required free diskspace for data processing is 20G. 
+The minimum required free disk space for data processing is 20G. 
 
 Daily processing jobs generate less than 3.0Gb data, includes both the downloaded data and products.  
 
