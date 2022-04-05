@@ -33,6 +33,8 @@ from_email = someone@example.com
 to_emails = someone@example.com
 SENDGRID_API_KEY = xxxx
 ```
+**Notes:** sendMail function can be updated to use other send mail serices, such as [smtplib](https://docs.python.org/3.9/library/smtplib.html)
+
 ## Test
 run **python monitor.py**, an email shall be recevied in severla minature with the status report.
 
