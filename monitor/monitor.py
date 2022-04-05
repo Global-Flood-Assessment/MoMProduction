@@ -87,6 +87,10 @@ def sendEmail(statusreport,statusflag):
     to_emails = config['EMAIL']['to_emails']
     sg_key = config['EMAIL']['SENDGRID_API_KEY']
 
+    # send to multiple email address
+    if "," in to_emails:
+        to_emails = to_emails.split(",")
+
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Mail
 
@@ -105,8 +109,6 @@ def sendEmail(statusreport,statusflag):
         print(e.message)
     
     return
-
-    
 
 def checkService():
     """check service status"""

@@ -116,14 +116,14 @@ sample log output
 ## 4. Setup cron jobs
 Each datasets are released in difference schedules, GloFAS, DFO, VIIRS are released once a day; GFMS are the predication data in 3-hour interval and available in advance, amd are processed along with GloFAS data. HWRF is updated every 6 six hours under certain weather conditions, there can be no HWRF data released in days. One hour interval between each job are suggested. The script for each job check if there is the new data need to be processed.  
 Use [corntab](https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804) command to create/edit cron jobs. 
-Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the absolute path to the python installation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample corntab entries:  
+Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the absolute path to the python installation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample crontab entries:  
 ```
 0 0,8,16 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
 0 1,7,13,19 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
 00 2,9,14,20 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
 00 3,10,15,21 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 ```
-**Notes:** Please referece [crotab_list.txt](https://github.com/Global-Flood-Assessment/MoMProduction/blob/dev/crontab_list.txt) for the latest cron setup. 
+**Notes:** Please reference [crontab_list.txt](https://github.com/Global-Flood-Assessment/MoMProduction/blob/dev/crontab_list.txt) for the latest cron setup. 
 ## 5. Storage requirements 
 The minimum required free disk space for data processing is 20G. 
 

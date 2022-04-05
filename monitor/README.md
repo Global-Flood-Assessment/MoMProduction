@@ -1,5 +1,5 @@
 # Monitor Service
-Monitor service check the latest outputs in Products to check the system operation status, if a data set is not produced on time, it will flag the oepration status as **warning**.  
+Monitor service check the latest outputs in Products to check the system operation status, if a data set is not produced on time, it will flag the operation status as **warning**.  
 
 ## Sample status report
 ```
@@ -30,16 +30,17 @@ monitor_config.cfg
 ```
 [EMAIL]
 from_email = someone@example.com
-to_emails = someone@example.com
+to_emails = someone@example.com,someoneelse@example.com
 SENDGRID_API_KEY = xxxx
 ```
-**Notes:** sendMail function can be updated to use other send mail serices, such as [smtplib](https://docs.python.org/3.9/library/smtplib.html)
+Email can send to one or multiple addresses (separated by ",").  
+**Notes:** sendMail function can be updated to use other send mail services, such as [smtplib](https://docs.python.org/3.9/library/smtplib.html)
 
 ## Test
-run **python monitor.py**, an email shall be recevied in severla minature with the status report.
+run **python monitor.py**, an email shall be received in several minutes with the status report.
 
 ## Add to Crobtab
 If the server is on UTC (+0000) time, this setup will send a report at 8:30 and 4:30 EDT.
 ```
-30 12,20 * * * cd /home/geogateway/MoMProduction/monitor && /home/geogateway/miniconda3/envs/mom/bin/python monitor.py  >/dev/null 2>&1
+30 12,20 * * * cd /home/tester/MoMProduction/monitor && /home/tester/miniconda3/envs/mom/bin/python monitor.py  >/dev/null 2>&1
 ```
