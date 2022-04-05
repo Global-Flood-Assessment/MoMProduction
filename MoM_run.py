@@ -61,6 +61,8 @@ def run_fixdate(cronjob, adate):
     logging.info("run fixdate {} {}".format(cronjob,adate))
     if cronjob == "GFMS":
         GFMS_fixdate(adate)
+    elif cronjob == "VIIRS":
+        VIIRS_cron(adate)
     else:
         return
 
