@@ -143,7 +143,7 @@ If the disk space is low, use the following steps to free up disk space:
 * If more space needed, under Products, all the tiffs images in _image subfolder can be removed, they are only for the archive purpose.  
 * A good practice is to delete the older *.zip/*.tiff first, and keep at least the recent data up to two weeks. 
 
-Disk space can be monitored with the optional [Monitor Module](). 
+Disk space can be monitored with the optional Monitor Module. 
 ## 6. Folder structures 
 Folder structures is defined in production.cfg, the default one is listed. Modify [general],[processing_dir], [products_dir] to change the locations. 
 ```
