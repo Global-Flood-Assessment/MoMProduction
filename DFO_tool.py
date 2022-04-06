@@ -23,11 +23,15 @@ import rasterio
 from rasterio.mask import mask
 
 from settings import *
-from utilities import watersheds_gdb_reader
+from utilities import watersheds_gdb_reader, from_today
 from DFO_MoM import update_DFO_MoM
 
 # for command line mode, no need for cron-job
 #from progressbar import progress
+
+# total number of hdf files
+DFO_TOTAL_TILES = 223
+DFO_MINIMUM_TILES = 221
 
 def get_real_date(year,day_num):
     """ get the real date"""
@@ -47,6 +51,7 @@ def check_status(adate):
     
     return processed
 
+
 def get_hosturl():
     """ get the host url"""
     baseurl = config.get('dfo','HOST')
@@ -60,7 +65,6 @@ def generate_procesing_list():
     hosturl = get_hosturl()   
     reqs = requests.get(hosturl)
     soup = BeautifulSoup(reqs.text,"html.parser")
-    
     cur_year = hosturl[-4:]
     datelist = {}
     for link in soup.find_all('a'):
@@ -213,7 +217,16 @@ def DFO_process(folder,adate):
         HDF = entry
         hdffiles.append(HDF)
     
-        # one step one image operation
+    # check the number of files
+    # need check the date first
+    ddays = from_today(adate)
+    # for the previous day, just process what ever it has
+    if ddays >= 0:
+        if len(hdffiles) < DFO_TOTAL_TILES:
+            logging.warning('Not enough files: ' + folder)
+            return
+    
+    # one step one image operation
     vrt_list = []
     for flood in floodlayer:
         subfolder = flood.replace(" ","_")
@@ -252,7 +265,7 @@ def DFO_process(folder,adate):
             #gdalcmd = f'gdaladdo -r average {tiff} 2 4 8 16 32'
             #os.system(gdalcmd)
         
-        # delete tiff folder
+        #delete tiff folder
         if os.path.exists(subfolder):
             shutil.rmtree(subfolder)   
 
@@ -293,9 +306,11 @@ def DFO_cron():
     """cron job to process DFO"""
 
     datelist = generate_procesing_list()
+     
     if len(datelist) == 0:
         logging.info("no new data to process!")
         sys.exit(0)    
+    
     
     for key in datelist:
         logging.info("download: " + key)

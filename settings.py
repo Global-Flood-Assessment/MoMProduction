@@ -26,6 +26,7 @@ PRODUCT_DIR = os.path.expanduser(config.get('general', 'PRODUCT_DIR'))
 # config GLOFAS directory
 GLOFAS_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'glofas'))
 GLOFAS_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'GLOFAS'))
+GLOFAS_SUM_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'GLOFAS'))
 
 # config GFMS directory
 GFMS_PROC_DIR = os.path.join(WORKING_DIR,config.get('processing_dir', 'gfms'))
@@ -57,6 +58,7 @@ HWRF_MOM_DIR = os.path.join(HWRF_DIR,"HWRF_MoM")
 
 # final product
 FINAL_MOM = os.path.join(PRODUCT_DIR,config.get('products_dir', 'FINAL'))
+FINAL_MOM_DIR = os.path.join(PRODUCT_DIR,config.get('products_dir', 'FINAL'))
 
 # config watershed shp file
 WATERSHED_DIR = os.path.join(BASE_DIR, 'watershed_shp')

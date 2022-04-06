@@ -1,8 +1,25 @@
 # ModelofModels Production
 The following guide is tested on Ubuntu 18.04 and 20.04 LTS.  
-The current testing VM is a m1.small instance on [Jetstream clound](https://portal.xsede.org/jetstream) with 2 vcpus, 4GB memory, 20GB storage with an extra 100GB volume attached.   
+The current testing VM is a m1.small instance on [Jetstream cloud](https://portal.xsede.org/jetstream) with 2 vcpus, 4GB memory, 20GB storage with an extra 100GB volume attached.   
 
-**Note**: A non-administrator user "tester" in Ubuntu is used this guide. Please update the path in cron-job examples with the right user name for your installation.   
+**Note**: A non-administrator user "tester" in Ubuntu is used this guide. Please update the path in cron-job examples with the right user name for your installation. 
+
+## 0. Timezone setup
+Upstream data are produced by agencies across the world, UTC time zone is recommended.  
+In Ubuntu, set timezone to UTC: 
+```
+sudo timedatectl set-timezone UTC
+```
+And run "timedatectl" to check: 
+```
+                      Local time: Mon 2022-04-04 01:45:14 UTC
+                  Universal time: Mon 2022-04-04 01:45:14 UTC
+                        RTC time: Mon 2022-04-04 01:45:14
+                       Time zone: UTC (UTC, +0000)
+       System clock synchronized: yes
+systemd-timesyncd.service active: yes
+                 RTC in local TZ: no
+```
 ## 1. Setup Python environment
 ### 1.1 Install Python
 Python version tested: 3.8, 3.9    
@@ -15,7 +32,11 @@ conda config --add channels conda-forge
 conda config --set channel_priority strict
 conda config --show channels
 ```
-### 1.2 Install Python Packages
+### 1.2 Clone MoMProduction repo:
+```
+git clone https://github.com/Global-Flood-Assessment/MoMProduction.git
+```
+### 1.3 Install Python Packages
 Install packages by creating an environment 'mom'.
 ```
 conda create --name mom --file packagelist.txt
@@ -28,12 +49,7 @@ Install the packages if not available:
 ```
 sudo apt install gdal_bin 
 ```
-
-## 2. Clone MoMProduction repo:
-```
-git clone https://github.com/Global-Flood-Assessment/MoMProduction.git
-```
-## 3. Initialize the setup
+## 2. Initialize the setup
 Please copy [sample_production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/sample_production.cfg) to **production.cfg**, or run initialize.py, it will do the copy.  
 Check production.cfg: 
 - in general section, change WORKING_DIR (base directory for downloading and processing data) and PRODUCT_DIR (base directory for the data products) if necessary;
@@ -62,7 +78,7 @@ It performs the following tasks:
 - check username/password, token in production.cfg
 - unzip watershed.shp 
 
-## 4. Test run
+## 3. Test run
 All the processing jobs can be tested in the following orders. It may take several hours to finish, it produces data products from the latest several days.
 ```
 python MoM_run.py -j GFMS
@@ -100,15 +116,16 @@ sample log output
 ## 4. Setup cron jobs
 Each datasets are released in difference schedules, GloFAS, DFO, VIIRS are released once a day; GFMS are the predication data in 3-hour interval and available in advance, amd are processed along with GloFAS data. HWRF is updated every 6 six hours under certain weather conditions, there can be no HWRF data released in days. One hour interval between each job are suggested. The script for each job check if there is the new data need to be processed.  
 Use [corntab](https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804) command to create/edit cron jobs. 
-Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the absolute path to the python installation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample corntab entries:  
+Sample cron setup, it assumes the miniconda is installed under /home/tester/miniconda3, use the absolute path to the python installation in the cron setup. Keep at least 1 hour interval between any two jobs. Sample crontab entries:  
 ```
 0 0,8,16 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j GFMS > /dev/null 2>&1
 0 1,7,13,19 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j HWRF  >/dev/null 2>&1
 00 2,9,14,20 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j DFO >/dev/null 2>&1
 00 3,10,15,21 * * * cd /home/tester/MoMProduction && /home/tester/miniconda3/envs/mom/bin/python MoM_run.py -j VIIRS  >/dev/null 2>&1
 ```
+**Notes:** Please reference [crontab_list.txt](https://github.com/Global-Flood-Assessment/MoMProduction/blob/dev/crontab_list.txt) for the latest cron setup. 
 ## 5. Storage requirements 
-The minimum required free diskspace for data processing is 20G. 
+The minimum required free disk space for data processing is 20G. 
 
 Daily processing jobs generate less than 3.0Gb data, includes both the downloaded data and products.  
 
@@ -120,7 +137,14 @@ production.cfg:
 dfo_save: False 
 viirs_save: False 
 ```
-## 5. Folder structures 
+### 5.1 Free up disk space
+If the disk space is low, use the following steps to free up disk space:
+* Remove the zip files in sub-folders under Processing, the zip files contain the downloaded data that already been processed, it is safe to delete them periodically.
+* If more space needed, under Products, all the tiffs images in _image subfolder can be removed, they are only for the archive purpose.  
+* A good practice is to delete the older *.zip/*.tiff first, and keep at least the recent data up to two weeks. 
+
+Disk space can be monitored with the optional Monitor Module. 
+## 6. Folder structures 
 Folder structures is defined in production.cfg, the default one is listed. Modify [general],[processing_dir], [products_dir] to change the locations. 
 ```
 MoM
@@ -152,7 +176,7 @@ MoM
         └── VIIRS_summary
 ```
 
-## 6. Processing modules & data
+## 7. Processing modules & data
 
 ```
 MoM_run.py 

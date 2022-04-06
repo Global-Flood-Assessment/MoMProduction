@@ -56,6 +56,7 @@ def GloFAS_process():
     """process glofas data"""
 
     new_files = GloFAS_download()
+    
     if len(new_files) == 0:
         logging.info("no new glofas file to process!")
         sys.exit()
@@ -146,6 +147,12 @@ def GFMS_download(bin_file):
 
     # check if it download
     binfile_local = os.path.join(GFMS_PROC_DIR,bin_file)
+    # check if the size is ok
+    if os.path.exists(binfile_local):
+        binsize = os.path.getsize(binfile_local)
+        if binsize < 7000000:
+            os.remove(binfile_local)
+            
     if not os.path.exists(binfile_local):
         # download the data
         try:
@@ -419,6 +426,39 @@ def GFMS_cron():
     # process GFMS data
     #processing_dates = ['2021120200']
     GFMS_processing(processing_dates)
+
+def GFMS_fixdate(adate):
+    """run cron job"""
+    # cron steup cd ~/ModelofModels/data && python datatool.py --cron
+    # run every three hours
+    # edit: crontab -e 
+    # 5 0,3,6,9,12,15,18,21 * * * commnad
+
+    # it is likly only one date: 2020051600
+    #processing_dates = GloFAS_process()
+    # check if GMS data is available 
+    #processing_dates = ['2020061800','2020061900','2020062000']
+    if len(adate) == 8:
+        adate = adate + "00"
+    processing_dates = [adate]
+    binhours = ["00","03","06","09","12","15","18","21"]
+    for data_date in processing_dates:
+        real_date = data_date[:-2]
+        for binhour in binhours:
+            #bin_file = "Flood_byStor_" + real_date + binhour + ".bin"
+            summary_file = "Flood_byStor_{}.csv".format(real_date + binhour)
+            summary_file = os.path.join(GFMS_SUM_DIR, summary_file)
+            # remove partial processed summary file
+            if os.path.exists(summary_file):
+                os.remove(summary_file)
+            # also need remove the file processing folder
+            csv_in_proc = "Flood_byStor_{}.csv".format(real_date + binhour)
+            csv_in_proc = os.path.join(GFMS_PROC_DIR, csv_in_proc)
+            if os.path.exists(csv_in_proc):
+                os.remove(csv_in_proc)    
+    # reprocessing file            
+    GFMS_processing(processing_dates)
+
 
 def main():
     """test code"""
