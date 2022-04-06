@@ -175,17 +175,15 @@ def checkService():
         [disk_status, status['diskstatus']] = checkDisk()
         status["checkDisk"] = True
         
-    print(status)
+    #print(status)
     msg = writeStatus(status, operation_status, disk_status)
     # emailsubject
     email_subject = "Operation: " + operation_status
     if status["checkDisk"]:
         email_subject += " | Disk: " + disk_status
-
-    sys.exit()
     
     # send email 
-    #sendEmail(msg,email_subject)
+    sendEmail(msg,email_subject)
 
 def checkDisk():
     """ check the disk space"""
