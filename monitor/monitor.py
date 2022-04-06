@@ -10,10 +10,12 @@
 
 import os,sys, glob
 import re
-
-current = os.path.dirname(os.path.realpath(__file__))
-
+import configparser
 from datetime import date, datetime
+import shutil
+
+# add path
+current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
@@ -23,8 +25,11 @@ from utilities import from_today
 monitor_data = ["GLOFAS","GFMS","HWRF","DFO","VIIRS"]
 monitor_mom = ["GFMS","HWRF","DFO","VIIRS","FINAL"]
 
-def findLatest(apath,atype):
-    """return the latst file in folder"""
+config = configparser.ConfigParser()
+config.read('monitor_config.cfg')
+
+def findLatest(apath, atype):
+    """return the latest file in folder"""
     check_path = os.path.join(apath,f"*.{atype}")
     all_files = glob.glob(check_path)
     latest_file = max(all_files, key=os.path.getctime)
@@ -38,7 +43,7 @@ def extractDate(astr):
 
     return adate
 
-def writeStatus(statusdict, statusflag):
+def writeStatus(statusdict, statusflag, diskflag=""):
     """write status to html file"""
 
     htmlfile = os.path.join(settings.PRODUCT_DIR,"footer.html")
@@ -60,7 +65,7 @@ def writeStatus(statusdict, statusflag):
             liststr += "<li>"+ textstr + "</li>"
 
     htmlstr += f"<ul>{liststr}</ul>"
-    htmlstr += "<h4>MoM Output</h4>"
+    htmlstr += "<h4>MoM Outputs</h4>"
     
     liststr = ""
     for item in monitor_mom:
@@ -72,17 +77,31 @@ def writeStatus(statusdict, statusflag):
 
     htmlstr += f"<ul>{liststr}</ul>"
 
+    # add check disk section
+    if statusdict['checkDisk']:
+        if diskflag != "normal":
+            htmlstr += '<h4>Disk Status: <span style="color:red">Warning</span></h3>'
+        else:
+            htmlstr += '<h3>Disk Status: <span style="color:green">Normal</span></h3>'
+        
+        liststr = ""
+        for item in statusdict['diskstatus']:
+            #"disk","freespace","status"  
+            textstr = item['disk'] + ": freespace " + "{:.2f}".format(item['freespace']) + " Gb"
+            if item['status'] != 'normal':
+                liststr +=  "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
+            else:
+               liststr += "<li>"+ textstr + "</li>"
+        htmlstr += f"<ul>{liststr}</ul>"
+    
     with open(htmlfile,"w") as f:
         f.write(htmlstr)
     
     return htmlstr
 
-def sendEmail(statusreport,statusflag):
+def sendEmail(statusreport,reportsubject):
     """send email"""
     
-    import configparser
-    config = configparser.ConfigParser()
-    config.read('monitor_config.cfg')
     from_email = config['EMAIL']['from_email']
     to_emails = config['EMAIL']['to_emails']
     sg_key = config['EMAIL']['SENDGRID_API_KEY']
@@ -94,12 +113,10 @@ def sendEmail(statusreport,statusflag):
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Mail
 
-    subject = "Operation: " + statusflag
-
     message = Mail(
         from_email=from_email,
         to_emails = to_emails,
-        subject = subject,
+        subject = reportsubject,
         html_content = statusreport )
     
     try:
@@ -151,10 +168,45 @@ def checkService():
             status[f"{item}_MoM_status"] = "warning"
             operation_status = "warning"
 
-    #print(status)
-    msg = writeStatus(status, operation_status)
-    # sedn email with 
-    sendEmail(msg,operation_status)
+    # check if it has the disk section
+    status["checkDisk"] = False
+    disk_status = ""
+    if config.has_section("DISK"):
+        [disk_status, status['diskstatus']] = checkDisk()
+        status["checkDisk"] = True
+        
+    print(status)
+    msg = writeStatus(status, operation_status, disk_status)
+    # emailsubject
+    email_subject = "Operation: " + operation_status
+    if status["checkDisk"]:
+        email_subject += " | Disk: " + disk_status
+
+    sys.exit()
+    
+    # send email 
+    #sendEmail(msg,email_subject)
+
+def checkDisk():
+    """ check the disk space"""
+
+    diskstatusL = []
+    disk_status_flag = "normal"
+    for k,v in config.items('DISK'):
+        disk_label = k
+        disk_mount, disk_threshold = v.split(",")
+        disk_threshold = float(disk_threshold)
+        disk_usage = shutil.disk_usage(disk_mount)
+        # convert to GB
+        freespace = disk_usage.free / (10**9)
+        if freespace < disk_threshold:
+            d_status = "warning"
+            disk_status_flag = "warning"
+        else:
+            d_status = "normal"
+        diskstatusL.append({"disk":disk_label,"freespace":freespace,"status":d_status})  
+    
+    return [disk_status_flag, diskstatusL]
 
 def main():
     checkService()
