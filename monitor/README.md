@@ -35,7 +35,7 @@ SENDGRID_API_KEY = xxxx
 ```
 Email can send to one or multiple addresses (separated by ",").  
 **Notes:** sendMail function can be updated to use other send mail services, such as [smtplib](https://docs.python.org/3.9/library/smtplib.html)
-### Check disk space
+### Check disk space (optional)
 monitor_config.cfg
 ```
 # run df -h command, use "mounted on"
