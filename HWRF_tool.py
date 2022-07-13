@@ -30,7 +30,15 @@ def check_status(adate):
     processed_list = os.listdir(settings.HWRF_SUM_DIR)
     processed = any(adate in x for x in processed_list)
     
-    return processed
+    if processed:
+        return processed
+    
+    # extra check
+    processed_list = os.listdir(settings.HWRF_PROC_DIR)
+    zipped_list = [x for x in processed_list if "zip" in x]
+    processed = any(adate in x for x in zipped_list)
+
+    return processed 
 
 def generate_procesing_list():
     """ generate the processing list"""
@@ -45,8 +53,6 @@ def generate_procesing_list():
         if (fstr[:5] == 'hwrf.'):
             a_entry = fstr.split('.')[1]
             a_entry = a_entry.replace("/","")
-            # if check_status(a_entry):
-            #     continue
             datelist[a_entry] = hosturl + fstr
     
     # first level output
@@ -61,7 +67,6 @@ def generate_procesing_list():
         for link in soup.find_all('a'):
             fstr = link.string
             hhstr = fstr.replace("/","")
-            print(fstr)
             if hhstr in ["00","06","12","18"]:
                 a_entry = key + hhstr
                 if check_status(a_entry):
@@ -254,9 +259,9 @@ def HWRF_cron():
     
     # get date list
     datelist = generate_procesing_list()
-    print(datelist)
-
-    sys.exit()
+    # for debug
+    #print(datelist)
+    #sys.exit()
 
     if len(datelist) == 0:
         logging.info("no new data to process!")
