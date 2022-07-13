@@ -45,11 +45,30 @@ def generate_procesing_list():
         if (fstr[:5] == 'hwrf.'):
             a_entry = fstr.split('.')[1]
             a_entry = a_entry.replace("/","")
-            if check_status(a_entry):
-                continue
+            # if check_status(a_entry):
+            #     continue
             datelist[a_entry] = hosturl + fstr
     
-    return datelist
+    # first level output
+    # {'20220712': 'https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20220712/', '20220713': 'https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20220713/'}
+    # extract second level 
+
+    dataurllist = {}
+    for key in datelist.keys():
+        hosturl = datelist[key]
+        reqs = requests.get(hosturl)
+        soup = BeautifulSoup(reqs.text,"html.parser")
+        for link in soup.find_all('a'):
+            fstr = link.string
+            hhstr = fstr.replace("/","")
+            print(fstr)
+            if hhstr in ["00","06","12","18"]:
+                a_entry = key + hhstr
+                if check_status(a_entry):
+                    continue
+                dataurllist[a_entry] = os.path.join(hosturl,fstr)
+
+    return dataurllist
 
 def HWRF_download(hwrfurl):
     """ download rainfall data"""
@@ -235,7 +254,9 @@ def HWRF_cron():
     
     # get date list
     datelist = generate_procesing_list()
-    #print(datelist)
+    print(datelist)
+
+    sys.exit()
 
     if len(datelist) == 0:
         logging.info("no new data to process!")
