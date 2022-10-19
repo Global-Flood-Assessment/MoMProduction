@@ -4,6 +4,7 @@ routines shared across the modules
 
 '''
 
+import os
 import settings
 import pandas as pd
 import geopandas 
@@ -39,7 +40,14 @@ def from_today(adate):
     delta = da - today
 
     return delta.days
+
+def findLatest(apath, atype):
+    """return the latest file in folder"""
+    check_path = os.path.join(apath,f"*.{atype}")
+    all_files = glob.glob(check_path)
+    latest_file = max(all_files, key=os.path.getctime)
     
+    return os.path.basename(latest_file)    
 
 def main():
     ''' test routines'''
@@ -60,6 +68,9 @@ def main():
     adate = adate + "18"
     ddays = from_today(adate)
     print("{} => {}".format(adate,ddays))
+    
+    lastest_csv = findLatest(settings.GFMS_SUM_DIR,"csv")
+    print(lastest_csv)
 
 if __name__ == '__main__':
     main()
