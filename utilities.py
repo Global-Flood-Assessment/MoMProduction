@@ -30,7 +30,7 @@ def read_data(datafile):
     #df = pd.DataFrame(df)
     return df
 
-def from_today(adate):GFMS
+def from_today(adate):
     # conver adate to date object
     # adate may come in as YYYYMMDD
     da = datetime.strptime(adate[:8],"%Y%m%d").date()
