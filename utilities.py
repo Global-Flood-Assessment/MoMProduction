@@ -4,7 +4,7 @@ routines shared across the modules
 
 '''
 
-import os
+import os, glob
 import settings
 import pandas as pd
 import geopandas 
@@ -30,9 +30,7 @@ def read_data(datafile):
     #df = pd.DataFrame(df)
     return df
 
-def from_today(adate):
-    """caculate days between adate (in YYYYMMDD) and today"""
-
+def from_today(adate):GFMS
     # conver adate to date object
     # adate may come in as YYYYMMDD
     da = datetime.strptime(adate[:8],"%Y%m%d").date()
@@ -69,7 +67,7 @@ def main():
     ddays = from_today(adate)
     print("{} => {}".format(adate,ddays))
     
-    lastest_csv = findLatest(settings.GFMS_SUM_DIR,"csv")
+    lastest_csv = findLatest(settings.GLOFAS_SUM_DIR,"csv")
     print(lastest_csv)
 
 if __name__ == '__main__':
