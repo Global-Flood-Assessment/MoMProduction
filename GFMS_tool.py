@@ -22,7 +22,7 @@ from rasterio import Affine # or from affine import Affine
 from shapely.geometry import Point
 
 from settings import *
-from utilities import watersheds_gdb_reader
+from utilities import watersheds_gdb_reader, findLatest
 from GFMS_MoM import flood_severity
 
 # no need for cron-job
@@ -168,7 +168,8 @@ def GFMS_download(bin_file):
     hdr_header = """NCOLS 2458
     NROWS 800
     XLLCORNER -127.25
-    YLLCORNER -50
+    YLLCORNER -50    print(lastest_csv)
+
     CELLSIZE 0.125
     PIXELTYPE FLOAT
     BYTEORDER LSBFIRST
@@ -222,6 +223,7 @@ def GFMS_download(bin_file):
         f.write(vrt_template.format(bin_file))
 
     return vrt_file
+    print(lastest_csv)
 
 def GFMS_extract_by_mask(vrt_file,mask_json):
     """extract data for a single watershed"""
@@ -236,7 +238,8 @@ def GFMS_extract_by_mask(vrt_file,mask_json):
             #'Input shapes do not overlap raster.'
             #print(e)
             src = None
-            # return empty dataframe
+            # return empty dataframe    print(lastest_csv)
+
             return pd.DataFrame()
 
     # extract data
@@ -399,6 +402,12 @@ def GFMS_processing(proc_dates_list):
         # flood severity calculation
         gfmscsv = os.path.join(GFMS_SUM_DIR, "Flood_byStor_" + data_date + ".csv")
         glofascsv = os.path.join(GLOFAS_DIR,  "threspoints_" + data_date + ".csv")
+        
+        # in case of glofascsv data is missing, use the latest
+        if not os.path.exists(glofascsv):
+            glofas_latest = findLatest(GLOFAS_DIR,"csv")
+            glofascsv = os.path.join(GLOFAS_DIR,  glofas_latest)
+
         flood_severity(gfmscsv,glofascsv,real_date)
 
         # zip GFMS data after processing

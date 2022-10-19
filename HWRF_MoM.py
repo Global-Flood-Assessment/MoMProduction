@@ -13,7 +13,7 @@ import glob
 import logging
 
 import settings
-from utilities import read_data
+from utilities import read_data, findLatest 
 
 
 def mofunc_hwrf(row):
@@ -63,7 +63,8 @@ def update_HWRF_MoM(adate):
 
     if not os.path.exists(glofas_sum):
         print("not found: ", glofas_sum)
-        return
+        glofas_latest = findLatest(settings.GLOFAS_DIR,"csv")
+        glofas_sum = os.path.join(settings.GLOFAS_DIR,  glofas_latest)
     
     #hwrf_sum may not have
     Final_Attributes_csv = os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}HWRFUpdated.csv'.format(adate))
