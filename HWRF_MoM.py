@@ -72,8 +72,10 @@ def update_HWRF_MoM(adate):
 
     #already processed
     if (os.path.exists(Final_Attributes_csv) and os.path.exists(Attributes_Clean_csv)):
-        print('already processed: ',adate)
-        return 
+        #print('already processed: ',adate)
+        return
+    else:
+        print("processing: ", adate)
     
     weightage = read_data(os.path.join(settings.BASE_DATA_DIR,'GFMS_Weightage.csv'))
     HWRF_weightage = read_data(os.path.join(settings.BASE_DATA_DIR,'HWRF_Weightage.csv'))
@@ -598,8 +600,8 @@ def final_alert_pdc(adate):
     if len(matching)<1:
         print("not found " + adate)
         return
-    else:
-        print(matching[0])
+    # else:
+    #     print(matching[0])
 
     aAlert = matching[0]
     # generate string from the previous day
@@ -617,8 +619,8 @@ def final_alert_pdc(adate):
         # shall call the function to generate it
         print("not found " + pdate)
         return
-    else:
-        print(matching[0])
+    # else:
+    #     print(matching[0])
 
     pAlert=matching[0]
 
