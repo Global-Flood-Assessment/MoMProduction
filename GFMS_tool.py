@@ -125,7 +125,7 @@ def GloFAS_process():
         
         logging.info("generated: " + out_csv)
 
-        # write to excelrasterio.errors.RasterioIOError
+        # write to excel
         # out_excel = glofasdata + "threspoints_" + data_date + ".xlsx"
         # gdf_watersheds.to_excel(out_excel,index=False,columns=out_columns,sheet_name='Sheet_name_1')
         
@@ -483,6 +483,4 @@ def main():
     GFMS_cron()
 
 if __name__ == "__main__":
-    debug()
-    sys.exit()
     main()
