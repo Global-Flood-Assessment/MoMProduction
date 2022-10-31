@@ -125,7 +125,7 @@ def GloFAS_process():
         
         logging.info("generated: " + out_csv)
 
-        # write to excel
+        # write to excelrasterio.errors.RasterioIOError
         # out_excel = glofasdata + "threspoints_" + data_date + ".xlsx"
         # gdf_watersheds.to_excel(out_excel,index=False,columns=out_columns,sheet_name='Sheet_name_1')
         
@@ -158,7 +158,7 @@ def GFMS_download(bin_file):
         try:
             r = requests.get(download_data_url, allow_redirects=True)
         except requests.exceptions.HTTPError as e:
-            logging.ERROR("Downlaod failed: " + e.response.text)
+            logging.error("Downlaod failed: " + e.response.text)
             sys.exit()
 
         open(binfile_local, 'wb').write(r.content)
@@ -234,12 +234,15 @@ def GFMS_extract_by_mask(vrt_file,mask_json):
     with rasterio.open(vrt_file) as src:
         try:
             out_image, out_transform = mask(src, [mask_json['features'][0]['geometry']], crop=True)
+        except rasterio.errors.RasterioIOError as er:
+            logging.warning("RasterioIOError:" + vrt_file)
+            src = None
+            return pd.DataFrame()
         except ValueError as e:
             #'Input shapes do not overlap raster.'
             #print(e)
             src = None
             # return empty dataframe    print(lastest_csv)
-
             return pd.DataFrame()
 
     # extract data
@@ -422,7 +425,7 @@ def GFMS_processing(proc_dates_list):
             try:
                 os.remove(filePath)
             except:
-                logging.WARNING("Error while deleting file : ", filePath)
+                logging.warning("Error while deleting file : ", filePath)
         os.chdir(curdir)
 
     return
@@ -469,9 +472,17 @@ def GFMS_fixdate(adate):
     GFMS_processing(processing_dates)
 
 
+def debug(): 
+    """debug the function"""
+    # issue 38: gfms broken bin file
+    binfile = "Flood_byStor_2022103103.bin"
+    GFMS_data_extractor(binfile)
+
 def main():
-    """test code"""
+    """run the cron job"""
     GFMS_cron()
 
 if __name__ == "__main__":
+    debug()
+    sys.exit()
     main()
