@@ -62,7 +62,7 @@ def update_HWRF_MoM(adate):
         GFMS_fixdate(adate[:8])
 
     if not os.path.exists(glofas_sum):
-        print("not found: ", glofas_sum)
+        #print("not found: ", glofas_sum)
         glofas_latest = findLatest(settings.GLOFAS_DIR,"csv")
         glofas_sum = os.path.join(settings.GLOFAS_DIR,  glofas_latest)
     
@@ -72,8 +72,10 @@ def update_HWRF_MoM(adate):
 
     #already processed
     if (os.path.exists(Final_Attributes_csv) and os.path.exists(Attributes_Clean_csv)):
-        print('already processed: ',adate)
-        return 
+        #print('already processed: ',adate)
+        return
+    else:
+        print("processing: ", adate)
     
     weightage = read_data(os.path.join(settings.BASE_DATA_DIR,'GFMS_Weightage.csv'))
     HWRF_weightage = read_data(os.path.join(settings.BASE_DATA_DIR,'HWRF_Weightage.csv'))
@@ -382,7 +384,7 @@ def update_HWRFMoM_DFO_VIIRS(adate):
     file_found = [1 for x in file_list if hwrf_pattern in x]
     if len(file_found) > 0:
         # this date is already processed
-        print(file_found)
+        #print(file_found)
         return
 
     # find the latest DFO, VIIRS summary
@@ -399,7 +401,7 @@ def update_HWRFMoM_DFO_VIIRS(adate):
     # geneate HWRF_DFO_MoM
     MOMOutput= os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}HWRFUpdated.csv'.format(adate))
     if not os.path.exists(MOMOutput):
-        print('can not find ' + MOMOutput)
+        #print('can not find ' + MOMOutput)
         return
 
     DFO = dfo_summary
@@ -596,10 +598,10 @@ def final_alert_pdc(adate):
     #Final_Attributes_2021102800HWRF+20211028DFO+20211027VIIRSUpdated.csv
     matching = [s for s in hwrfh_list if adate+"HWRF+" in s]
     if len(matching)<1:
-        print("not found " + adate)
+        #print("not found " + adate)
         return
-    else:
-        print(matching[0])
+    # else:
+    #     print(matching[0])
 
     aAlert = matching[0]
     # generate string from the previous day
@@ -615,10 +617,10 @@ def final_alert_pdc(adate):
     # no previous date
     if len(matching)<1:
         # shall call the function to generate it
-        print("not found " + pdate)
+        #print("not found " + pdate)
         return
-    else:
-        print(matching[0])
+    # else:
+    #     print(matching[0])
 
     pAlert=matching[0]
 
