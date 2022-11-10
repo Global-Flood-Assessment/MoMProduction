@@ -29,6 +29,13 @@ def mofunc_dfo(row):
 def update_DFO_MoM(adate):
     ''' update MoM - DFO at a given date '''
 
+    #check DFO sum file
+    # not need to run the other part of code if no summary
+    DFOsummary= os.path.join(settings.DFO_SUM_DIR, 'DFO_{}.csv'.format(adate))
+    if not os.path.exists(DFOsummary):
+        logging.info(DFOsummary + " is not generated yet!")
+        return
+    
     hh = 18
     #Final_Attributes_yyyymmddhhMOM+DFOUpdated.csv
     #Attributes_clean_yyyymmddhhMOM+DFOUpdated.csv 
@@ -45,6 +52,7 @@ def update_DFO_MoM(adate):
     for hh0 in hhs:
         MOMOutput=os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}{}HWRFUpdated.csv'.format(adate,hh0))
         if not os.path.exists(MOMOutput):
+            logging.info("force generate HWRF :" + MOMOutput)
             update_HWRF_MoM(adate+hh0)
     MOMOutput=os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}{}HWRFUpdated.csv'.format(adate,hh))
 
@@ -53,12 +61,6 @@ def update_DFO_MoM(adate):
     PDC_resilience = read_data(os.path.join(settings.BASE_DATA_DIR,'Resilience_Index.csv'))
 
     add_field_DFO=['DFO_area_1day_score', 'DFO_percarea_1day_score', 'DFO_area_2day_score', 'DFO_percarea_2day_score','DFO_area_3day_score', 'DFO_percarea_3day_score','DFOTotal_Score']
-
-    #Read DFO Processing data and calculate score
-    DFOsummary= os.path.join(settings.DFO_SUM_DIR, 'DFO_{}.csv'.format(adate))
-    if not os.path.exists(DFOsummary):
-        logging.warning("can't find: " + DFOsummary)
-        return
 
     with open(DFOsummary, 'r', encoding='UTF-8') as DFO_file:
         DFO_reader = csv.reader(DFO_file)
