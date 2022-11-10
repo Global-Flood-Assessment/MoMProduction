@@ -19,7 +19,7 @@ import math
 from shapely.geometry import Point
 import shutil
 import zipfile
-from HWRF_MoM import update_HWRF_MoM
+from HWRF_MoM import update_HWRF_MoM, update_HWRFMoM_DFO_VIIRS, final_alert_pdc
 
 import settings
 from utilities import watersheds_gdb_reader
@@ -289,6 +289,8 @@ def HWRF_cron():
         # run MoM update
         testdate = key
         update_HWRF_MoM(testdate)
+        update_HWRFMoM_DFO_VIIRS(testdate)
+        final_alert_pdc(testdate)
 
     os.chdir(settings.BASE_DIR)
 
