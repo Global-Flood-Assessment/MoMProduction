@@ -40,6 +40,20 @@ def check_status(adate):
 
     return processed 
 
+def check_hours(adate):
+    """ check if it is too early to process"""
+    # adate in YYYYMMDDHH
+    TIME_DELDAY = 8 #hours
+    from datetime import datetime
+    ct = datetime.now()
+    da = datetime.strptime(adate,"%Y%m%d%H")
+    delta = ct - da
+    dhours = int(delta.total_seconds() / 3600)
+    if dhours > TIME_DELDAY:
+        return False
+    else:
+        return True
+
 def generate_procesing_list():
     """ generate the processing list"""
 
@@ -70,6 +84,9 @@ def generate_procesing_list():
             if hhstr in ["00","06","12","18"]:
                 a_entry = key + hhstr
                 if check_status(a_entry):
+                    continue
+                # check if it is too early to process the data
+                if check_hours(a_entry):
                     continue
                 dataurllist[a_entry] = os.path.join(hosturl,fstr)
 
@@ -260,8 +277,8 @@ def HWRF_cron():
     # get date list
     datelist = generate_procesing_list()
     # for debug
-    #print(datelist)
-    #sys.exit()
+    print(datelist)
+    sys.exit()
 
     if len(datelist) == 0:
         logging.info("no new data to process!")
