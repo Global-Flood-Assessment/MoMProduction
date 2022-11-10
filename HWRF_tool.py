@@ -43,7 +43,7 @@ def check_status(adate):
 def check_hours(adate):
     """ check if it is too early to process"""
     # adate in YYYYMMDDHH
-    TIME_DELDAY = 8 #hours
+    TIME_DELDAY = 6 #hours
     from datetime import datetime
     ct = datetime.now()
     da = datetime.strptime(adate,"%Y%m%d%H")
