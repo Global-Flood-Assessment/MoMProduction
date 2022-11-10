@@ -13,7 +13,7 @@ import glob
 import logging
 
 import settings
-from utilities import read_data, findLatest 
+from utilities import read_data, findLatest, hour_diff
 
 
 def mofunc_hwrf(row):
@@ -66,6 +66,15 @@ def update_HWRF_MoM(adate):
         glofas_latest = findLatest(settings.GLOFAS_DIR,"csv")
         glofas_sum = os.path.join(settings.GLOFAS_DIR,  glofas_latest)
     
+    # hwrf sum is not exists
+    if not os.path.exists(hwrf_sum):
+        hwrf_latest = findLatest(settings.HWRF_SUM_DIR,"csv")
+        # 	hwrf.2022110906rainfall.csv
+        ld_str = hwrf_latest.split(".")[1].replace("rainfall",'')
+        h_diff = hour_diff(adate,ld_str)
+        if h_diff < 16:
+            hwrf_sum = os.path.join(settings.HWRF_SUM_DIR,"hwrf.{}rainfall.csv".format(ld_str))
+
     #hwrf_sum may not have
     Final_Attributes_csv = os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}HWRFUpdated.csv'.format(adate))
     Attributes_Clean_csv = os.path.join(settings.HWRF_MOM_DIR,'Attributes_Clean_{}HWRFUpdated.csv'.format(adate))
