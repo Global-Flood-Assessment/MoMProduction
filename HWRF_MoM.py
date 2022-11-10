@@ -74,7 +74,6 @@ def update_HWRF_MoM(adate):
         h_diff = abs(hour_diff(adate,ld_str))
         if h_diff < 16:
             hwrf_sum = os.path.join(settings.HWRF_SUM_DIR,"hwrf.{}rainfall.csv".format(ld_str))
-            logging.info("using: " + hwrf_sum)
 
     #hwrf_sum may not have
     Final_Attributes_csv = os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}HWRFUpdated.csv'.format(adate))
@@ -267,6 +266,7 @@ def update_HWRF_MoM(adate):
     ## Read HWRF rainfall processed data and calculate separate hazard Score
     try:
         with open(hwrf_sum, 'r', encoding='UTF-8') as HWRF_file:
+            logging.info("using: " + hwrf_sum)
             HWRF_reader = csv.reader(HWRF_file)
             HWRF_w_score_csv = "HWRF_w_score_{}.csv".format(adate)
             HWRF_w_score_csv = os.path.join(settings.HWRF_PROC_DIR, HWRF_w_score_csv)
