@@ -277,8 +277,8 @@ def HWRF_cron():
     # get date list
     datelist = generate_procesing_list()
     # for debug
-    print(datelist)
-    sys.exit()
+    #print(datelist)
+    #sys.exit()
 
     if len(datelist) == 0:
         logging.info("no new data to process!")
