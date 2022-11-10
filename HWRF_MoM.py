@@ -71,9 +71,10 @@ def update_HWRF_MoM(adate):
         hwrf_latest = findLatest(settings.HWRF_SUM_DIR,"csv")
         # 	hwrf.2022110906rainfall.csv
         ld_str = hwrf_latest.split(".")[1].replace("rainfall",'')
-        h_diff = hour_diff(adate,ld_str)
+        h_diff = abs(hour_diff(adate,ld_str))
         if h_diff < 16:
             hwrf_sum = os.path.join(settings.HWRF_SUM_DIR,"hwrf.{}rainfall.csv".format(ld_str))
+            logging.info("using: " + hwrf_sum)
 
     #hwrf_sum may not have
     Final_Attributes_csv = os.path.join(settings.HWRF_MOM_DIR,'Final_Attributes_{}HWRFUpdated.csv'.format(adate))
