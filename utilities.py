@@ -39,6 +39,15 @@ def from_today(adate):
 
     return delta.days
 
+def hour_diff(adate1,adate2):
+    """find the hour difference bewteen to date string"""
+    # data format YYYYMMDDHH
+    da1 = datetime.strptime(adate1,"%Y%m%d%H")
+    da2 = datetime.strptime(adate2,"%Y%m%d%H")
+    delta = da1 - da2
+    dhours = int(delta.total_seconds() / 3600)
+    return dhours
+
 def findLatest(apath, atype):
     """return the latest file in folder"""
     check_path = os.path.join(apath,f"*.{atype}")
@@ -67,6 +76,17 @@ def main():
     ddays = from_today(adate)
     print("{} => {}".format(adate,ddays))
     
+    # test hour_diff
+    da1 = "2022100910"
+    da2 = "2022100918"
+    dhours = hour_diff(da1,da2)
+    print("{} - {} = {} hours".format(da1,da2,dhours))
+
+    da1 = "2022100910"
+    da2 = "2022100818"
+    dhours = hour_diff(da1,da2)
+    print("{} - {} = {} hours".format(da1,da2,dhours))
+
     lastest_csv = findLatest(settings.GLOFAS_SUM_DIR,"csv")
     print(lastest_csv)
 

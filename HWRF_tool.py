@@ -19,7 +19,7 @@ import math
 from shapely.geometry import Point
 import shutil
 import zipfile
-from HWRF_MoM import update_HWRF_MoM
+from HWRF_MoM import update_HWRF_MoM, update_HWRFMoM_DFO_VIIRS, final_alert_pdc
 
 import settings
 from utilities import watersheds_gdb_reader
@@ -39,6 +39,20 @@ def check_status(adate):
     processed = any(adate in x for x in zipped_list)
 
     return processed 
+
+def check_hours(adate):
+    """ check if it is too early to process"""
+    # adate in YYYYMMDDHH
+    TIME_DELDAY = 6 #hours
+    from datetime import datetime
+    ct = datetime.now()
+    da = datetime.strptime(adate,"%Y%m%d%H")
+    delta = ct - da
+    dhours = int(delta.total_seconds() / 3600)
+    if dhours > TIME_DELDAY:
+        return False
+    else:
+        return True
 
 def generate_procesing_list():
     """ generate the processing list"""
@@ -70,6 +84,9 @@ def generate_procesing_list():
             if hhstr in ["00","06","12","18"]:
                 a_entry = key + hhstr
                 if check_status(a_entry):
+                    continue
+                # check if it is too early to process the data
+                if check_hours(a_entry):
                     continue
                 dataurllist[a_entry] = os.path.join(hosturl,fstr)
 
@@ -289,6 +306,8 @@ def HWRF_cron():
         # run MoM update
         testdate = key
         update_HWRF_MoM(testdate)
+        update_HWRFMoM_DFO_VIIRS(testdate)
+        final_alert_pdc(testdate)
 
     os.chdir(settings.BASE_DIR)
 
