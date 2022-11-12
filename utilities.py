@@ -65,12 +65,18 @@ def url_exits(aurl):
     else:
         return False
 
-def hwrf_today(ahour=''):
+def hwrf_today(adate='', ahour=''):
     """check if hwrf has date for today"""
-    today = date.today()
-    tstr = today.strftime("%Y%m%d")
+    tstr, hstr = adate, ahour
+    if tstr == "":
+        today = date.today()
+        tstr = today.strftime("%Y%m%d")
+
+    if hstr == '':
+        hstr = '00'
+
     hosturl = settings.config.get('hwrf','HOST')
-    turl = os.path.join(hosturl,"hwrf.{}".format(tstr),ahour)
+    turl = os.path.join(hosturl,"hwrf.{}".format(tstr),hstr)
     print(turl)
     has_data = url_exits(turl)
     return has_data
@@ -121,7 +127,10 @@ def main():
 
     print("==> hwrf today")
     print("hwrf has the data today: ",hwrf_today())
-    print("hwrf has the data today: ",hwrf_today(ahour="00"))
+    print("hwrf has the data today: ",hwrf_today(ahour="06"))
+    print("hwrf has the data today: ",hwrf_today(adate="20221111", ahour='00'))
+    print("hwrf has the data today: ",hwrf_today(adate="20221111", ahour='06'))
+    
 
 if __name__ == '__main__':
     main()
