@@ -127,6 +127,36 @@ def sendEmail(statusreport,reportsubject):
     
     return
 
+def sendEmailSMTP(statusreport,reportsubject):
+    """send email with SMTP server"""
+
+    from_email = config['SMTP']['from_email']
+    to_emails = config['SMTP']['to_emails']
+
+    # send to multiple email address
+    if "," in to_emails:
+        to_emails = to_emails.split(",")
+
+    from email.message import EmailMessage
+
+    msg = EmailMessage()
+    msg['From'] = from_email
+    msg['To'] = to_emails
+    msg['Subject'] = reportsubject
+    msg.set_content('status report')
+    msg.add_alternative(statusreport, subtype='html')
+
+    import smtplib
+    smtpServer = config['SMTP']['server']
+    smtpPort = config['SMTP']['port']
+    server = smtplib.SMTP(host=smtpServer, port=smtpPort)
+    if config.has_option('SMTP', 'login'):
+        smtpLogin = config['SMTP']['login']
+        server.login('apikey', smtpLogin)
+    server.set_debuglevel(1)
+    server.send_message(msg)
+    server.quit()
+
 def checkService():
     """check service status"""
     # get the date
@@ -183,7 +213,10 @@ def checkService():
         email_subject += " | Disk: " + disk_status
     
     # send email 
-    sendEmail(msg,email_subject)
+    #sendEmail(msg,email_subject)
+
+    if config.has_section("SMTP"):
+        sendEmailSMTP(msg,email_subject)
 
 def checkDisk():
     """ check the disk space"""
