@@ -21,20 +21,32 @@ FINAL : 20220403 : Final_Attributes_2022040306HWRF+MOM+DFO+VIIRSUpdated_PDC.csv
 **Notes:** in html email, the warning item is marked by red
 
 ## Send email
+SMTP or sendgrid service
+
 The current code use [sendgrid](https://sendgrid.com/) free account, install [sendgrid python client](https://github.com/sendgrid/sendgrid-python/) under the virtual environment running MoM code. 
 ```
 pip install sendgrid
 ```
+
 ## Modify configuration:
-monitor_config.cfg
+monitor_config.cfg, choose any one from smtp or sendgrid.  
+configuration for **smtp**
+```
+[SMTP]
+from_email = someone@example.com 
+to_emails = person1@example.com,person2@example.com
+server =  smtp.exmaple.org
+port = 25
+```
+configuration for **sendgrid**
 ```
 [EMAIL]
 from_email = someone@example.com
-to_emails = someone@example.com,someoneelse@example.com
+to_emails = person1@example.com,person2@example.com
 SENDGRID_API_KEY = xxxx
 ```
 Email can send to one or multiple addresses (separated by ",").  
-**Notes:** sendMail function can be updated to use other send mail services, such as [smtplib](https://docs.python.org/3.9/library/smtplib.html)
+
 ### Check disk space (optional)
 monitor_config.cfg
 ```
