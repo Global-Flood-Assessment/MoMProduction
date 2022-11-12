@@ -22,8 +22,9 @@ from rasterio import Affine # or from affine import Affine
 from shapely.geometry import Point
 
 from settings import *
-from utilities import watersheds_gdb_reader, findLatest
+from utilities import watersheds_gdb_reader, findLatest, hwrf_today
 from GFMS_MoM import flood_severity
+from HWRF_MoM import update_HWRF_MoM
 
 # no need for cron-job
 # from progressbar import progress
@@ -438,6 +439,21 @@ def GFMS_cron():
     # process GFMS data
     #processing_dates = ['2021120200']
     GFMS_processing(processing_dates)
+
+    # check if today's date are generated
+    # if now hwrf data, then generate the output for 00 hour
+    hwrf_flag = hwrf_today()
+    if hwrf_flag:
+        return
+    # otherwise
+    today = date.today()
+    tstr = today.strftime("%Y%m%d")
+    tstr = tstr + "00"
+    gfmscsv = os.path.join(GFMS_SUM_DIR, "Flood_byStor_" + tstr + ".csv")
+    glofascsv = os.path.join(GLOFAS_DIR,  "threspoints_" + tstr + ".csv")
+    if os.path.exists(gfmscsv) and os.path.exists(glofascsv):
+        logging.info("no hwrf: " + tstr + " generating ...")
+        update_HWRF_MoM(tstr)
 
 def GFMS_fixdate(adate):
     """run cron job"""
