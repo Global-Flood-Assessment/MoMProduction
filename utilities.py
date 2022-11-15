@@ -9,6 +9,7 @@ import settings
 import pandas as pd
 import geopandas 
 from datetime import date,timedelta,datetime
+import requests
 
 def watersheds_gdb_reader():
     """reader watersheds gdb into geopandas"""
@@ -56,13 +57,39 @@ def findLatest(apath, atype):
     
     return os.path.basename(latest_file)    
 
+def url_exits(aurl):
+    """test if a url exists"""
+    req = requests.get(aurl)
+    if req.status_code == 200:
+        return True
+    else:
+        return False
+
+def hwrf_today(adate='', ahour=''):
+    """check if hwrf has date for today"""
+    tstr, hstr = adate, ahour
+    if tstr == "":
+        today = date.today()
+        tstr = today.strftime("%Y%m%d")
+
+    if hstr == '':
+        hstr = '00'
+
+    hosturl = settings.config.get('hwrf','HOST')
+    turl = os.path.join(hosturl,"hwrf.{}".format(tstr),hstr)
+    print(turl)
+    has_data = url_exits(turl)
+    return has_data
+
 def main():
     ''' test routines'''
 
+    print("==> read watershed")
     watershed = watersheds_gdb_reader()
     print(watershed.head)
 
     # test from today function
+    print("==> from tdoay")
     adate = date.today().strftime("%Y%m%d")
     ddays = from_today(adate)
     print("{} => {}".format(adate,ddays))
@@ -77,6 +104,7 @@ def main():
     print("{} => {}".format(adate,ddays))
     
     # test hour_diff
+    print("==> hour diff")
     da1 = "2022100910"
     da2 = "2022100918"
     dhours = hour_diff(da1,da2)
@@ -87,8 +115,22 @@ def main():
     dhours = hour_diff(da1,da2)
     print("{} - {} = {} hours".format(da1,da2,dhours))
 
+    print("==> find latest")
     lastest_csv = findLatest(settings.GLOFAS_SUM_DIR,"csv")
     print(lastest_csv)
+
+    print("==> url exist")
+    aurl = "https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20221111/00/"
+    print(aurl,":",url_exits(aurl))
+    aurl = "https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20221111/06/"
+    print(aurl,":",url_exits(aurl))
+
+    print("==> hwrf today")
+    print("hwrf has the data today: ",hwrf_today())
+    print("hwrf has the data today: ",hwrf_today(ahour="06"))
+    print("hwrf has the data today: ",hwrf_today(adate="20221111", ahour='00'))
+    print("hwrf has the data today: ",hwrf_today(adate="20221111", ahour='06'))
+    
 
 if __name__ == '__main__':
     main()
