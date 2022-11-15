@@ -20,7 +20,7 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 import settings
-from utilities import from_today
+from utilities import from_today, hwrf_today
 
 monitor_data = ["GLOFAS","GFMS","HWRF","DFO","VIIRS"]
 monitor_mom = ["GFMS","HWRF","DFO","VIIRS","FINAL"]
@@ -59,8 +59,10 @@ def writeStatus(statusdict, statusflag, diskflag=""):
     liststr = ""
     for item in monitor_data:
         textstr = item + " : " + statusdict[f'{item}_data_date'] + " : " + statusdict[f'{item}_data']
-        if statusdict[f'{item}_data_status'] != 'normal':
+        if statusdict[f'{item}_data_status'] != 'normal':    
             liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
+            if item == "HWRF":
+                liststr += "HWRF data release at " + statusdict['checktime'] + " : " + str(hwrf_today());
         else:
             liststr += "<li>"+ textstr + "</li>"
 
@@ -175,12 +177,15 @@ def checkService():
         fdays = from_today(adate)
         status[f"{item}_data_status"] = "normal"
 
-        if item in ["GLOFAS","GFMS","HWRF"] and fdays < -1:
+        if item in ["GLOFAS","GFMS"] and fdays < -1:
             status[f"{item}_data_status"] = "warning"
             operation_status = "warning"
         if item in ["DFO","VIIRS"] and fdays < -2:
             status[f"{item}_data_status"] = "warning"
             operation_status = "warning"
+        # hwrf will not show warning
+        if item in ["HWRF"] and fdays < -2:
+            status[f"{item}_data_status"] = "warning"
 
     for item in monitor_mom:
         the_folder = eval("settings." + item + "_MOM_DIR")
