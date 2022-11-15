@@ -218,7 +218,8 @@ def checkService():
         email_subject += " | Disk: " + disk_status
     
     # send email 
-    #sendEmail(msg,email_subject)
+    if config.has_section("EMAIL"):
+        sendEmail(msg,email_subject)
 
     if config.has_section("SMTP"):
         sendEmailSMTP(msg,email_subject)
