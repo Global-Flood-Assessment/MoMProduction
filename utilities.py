@@ -77,7 +77,7 @@ def hwrf_today(adate='', ahour=''):
 
     hosturl = settings.config.get('hwrf','HOST')
     turl = os.path.join(hosturl,"hwrf.{}".format(tstr),hstr)
-    print(turl)
+    #print(turl)
     has_data = url_exits(turl)
     return has_data
 

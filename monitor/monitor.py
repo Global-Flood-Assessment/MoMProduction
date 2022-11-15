@@ -62,7 +62,7 @@ def writeStatus(statusdict, statusflag, diskflag=""):
         if statusdict[f'{item}_data_status'] != 'normal':    
             liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
             if item == "HWRF":
-                liststr += "HWRF data release at " + statusdict['checktime'] + " : " + str(hwrf_today());
+                liststr += "HWRF data release at " + statusdict['checktime'].split(",")[0] + " : " + str(hwrf_today());
         else:
             liststr += "<li>"+ textstr + "</li>"
 
