@@ -24,7 +24,7 @@ from shapely.geometry import Point
 from settings import *
 from utilities import watersheds_gdb_reader, findLatest, hwrf_today
 from GFMS_MoM import flood_severity
-from HWRF_MoM import update_HWRF_MoM
+from HWRF_MoM import update_HWRF_MoM, update_HWRFMoM_DFO_VIIRS, final_alert_pdc 
 
 # no need for cron-job
 # from progressbar import progress
@@ -454,6 +454,8 @@ def GFMS_cron():
     if os.path.exists(gfmscsv) and os.path.exists(glofascsv):
         logging.info("no hwrf: " + tstr + " generating ...")
         update_HWRF_MoM(tstr)
+        update_HWRFMoM_DFO_VIIRS(tstr)
+        final_alert_pdc(tstr)
 
 def GFMS_fixdate(adate):
     """run cron job"""
