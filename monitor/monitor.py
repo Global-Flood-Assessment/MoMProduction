@@ -184,7 +184,7 @@ def checkService():
             status[f"{item}_data_status"] = "warning"
             operation_status = "warning"
         # hwrf will not show warning
-        if item in ["HWRF"] and fdays < -2:
+        if item in ["HWRF"] and fdays < -1:
             status[f"{item}_data_status"] = "warning"
 
     for item in monitor_mom:
