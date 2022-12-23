@@ -1186,7 +1186,9 @@ def final_alert_pdc(adate):
 
 
 def hwrf_workflow(adate):
-    """the hwrf workflow on a date"""
+    """the hwrf workflow on a date
+    to simplify the call from the other scripts
+    """
     update_HWRF_MoM(adate)
     update_HWRFMoM_DFO_VIIRS(adate)
     final_alert_pdc(adate)
@@ -1232,6 +1234,7 @@ def batchrun_HWRF_MoM():
 def main():
     # run batch mode
     # testdate = '2021120406'
+    # the following three function is replaced by hwrf_workflow
     # update_HWRF_MoM(testdate)
     # update_HWRFMoM_DFO_VIIRS(testdate)
     # final_alert_pdc(testdate)
