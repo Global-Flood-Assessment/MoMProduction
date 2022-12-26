@@ -131,9 +131,15 @@ def main():
     print(lastest_csv)
 
     print("==> url exist")
-    aurl = "https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20221111/00/"
+    today = date.today()
+    tstr = today.strftime("%Y%m%d")
+    aurl = f"https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.{tstr}/00/"
+    print("HWRF today: ")
     print(aurl, ":", url_exits(aurl))
-    aurl = "https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20221111/06/"
+    ereyesterday = today - timedelta(days=2)
+    tstr = ereyesterday.strftime("%Y%m%d")
+    print("HWRF the day before yesterday")
+    aurl = f"https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.{tstr}/00/"
     print(aurl, ":", url_exits(aurl))
 
     print("==> hwrf today")
