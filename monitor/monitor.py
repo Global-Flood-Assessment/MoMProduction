@@ -8,11 +8,13 @@
             pip install sendgrid
 """
 
-import os,sys, glob
-import re
 import configparser
-from datetime import date, datetime
+import glob
+import os
+import re
 import shutil
+import sys
+from datetime import date, datetime
 
 # add path
 current = os.path.dirname(os.path.realpath(__file__))
@@ -22,91 +24,121 @@ sys.path.append(parent)
 import settings
 from utilities import from_today, hwrf_today
 
-monitor_data = ["GLOFAS","GFMS","HWRF","DFO","VIIRS"]
-monitor_mom = ["GFMS","HWRF","DFO","VIIRS","FINAL"]
+monitor_data = ["GLOFAS", "GFMS", "HWRF", "DFO", "VIIRS"]
+monitor_mom = ["GFMS", "HWRF", "DFO", "VIIRS", "FINAL"]
 
 config = configparser.ConfigParser()
-config.read('monitor_config.cfg')
+config.read("monitor_config.cfg")
+
 
 def findLatest(apath, atype):
     """return the latest file in folder"""
-    check_path = os.path.join(apath,f"*.{atype}")
+    check_path = os.path.join(apath, f"*.{atype}")
     all_files = glob.glob(check_path)
-    latest_file = max(all_files, key=os.path.getctime)
-    
+    # latest_file = max(all_files, key=os.path.getctime)
+    # date str is in YYYYMMDDHH format, string sort is enought
+    latest_file = max(all_files)
+
     return os.path.basename(latest_file)
+
 
 def extractDate(astr):
     """extract date from astr"""
-    match_str = re.search(r'\d{8}', astr)
+    match_str = re.search(r"\d{8}", astr)
     adate = match_str.group()
 
     return adate
 
+
 def writeStatus(statusdict, statusflag, diskflag=""):
     """write status to html file"""
 
-    htmlfile = os.path.join(settings.PRODUCT_DIR,"footer.html")
+    htmlfile = os.path.join(settings.PRODUCT_DIR, "footer.html")
     htmlstr = ""
     if statusflag != "normal":
         htmlstr += '<h3>Operation Status: <span style="color:red">Warning</span></h3>'
     else:
         htmlstr += '<h3>Operation Status: <span style="color:green">Normal</span></h3>'
 
-    htmlstr += "<h4>Report time: " + statusdict['checktime'] + "</h4>"
+    htmlstr += "<h4>Report time: " + statusdict["checktime"] + "</h4>"
 
     htmlstr += "<h4>Data Processing</h4>"
     liststr = ""
     for item in monitor_data:
-        textstr = item + " : " + statusdict[f'{item}_data_date'] + " : " + statusdict[f'{item}_data']
-        if statusdict[f'{item}_data_status'] != 'normal':    
-            liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
+        textstr = (
+            item
+            + " : "
+            + statusdict[f"{item}_data_date"]
+            + " : "
+            + statusdict[f"{item}_data"]
+        )
+        if statusdict[f"{item}_data_status"] != "normal":
+            liststr += "<li>" + f'<span style="color:red">{textstr}</span>' + "</li>"
             if item == "HWRF":
-                liststr += "HWRF data release at " + statusdict['checktime'].split(",")[0] + " : " + str(hwrf_today());
+                liststr += (
+                    "HWRF data release at "
+                    + statusdict["checktime"].split(",")[0]
+                    + " : "
+                    + str(hwrf_today())
+                )
         else:
-            liststr += "<li>"+ textstr + "</li>"
+            liststr += "<li>" + textstr + "</li>"
 
     htmlstr += f"<ul>{liststr}</ul>"
     htmlstr += "<h4>MoM Outputs</h4>"
-    
+
     liststr = ""
     for item in monitor_mom:
-        textstr = item + " : " + statusdict[f'{item}_MoM_date'] + " : " + statusdict[f'{item}_MoM']
-        if statusdict[f'{item}_MoM_status'] != 'normal':
-            liststr += "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
+        textstr = (
+            item
+            + " : "
+            + statusdict[f"{item}_MoM_date"]
+            + " : "
+            + statusdict[f"{item}_MoM"]
+        )
+        if statusdict[f"{item}_MoM_status"] != "normal":
+            liststr += "<li>" + f'<span style="color:red">{textstr}</span>' + "</li>"
         else:
-            liststr += "<li>"+ textstr + "</li>"
+            liststr += "<li>" + textstr + "</li>"
 
     htmlstr += f"<ul>{liststr}</ul>"
 
     # add check disk section
-    if statusdict['checkDisk']:
+    if statusdict["checkDisk"]:
         if diskflag != "normal":
             htmlstr += '<h4>Disk Status: <span style="color:red">Warning</span></h3>'
         else:
             htmlstr += '<h3>Disk Status: <span style="color:green">Normal</span></h3>'
-        
+
         liststr = ""
-        for item in statusdict['diskstatus']:
-            #"disk","freespace","status"  
-            textstr = item['disk'] + ": freespace " + "{:.2f}".format(item['freespace']) + " Gb"
-            if item['status'] != 'normal':
-                liststr +=  "<li>"+ f'<span style="color:red">{textstr}</span>'+ "</li>"
+        for item in statusdict["diskstatus"]:
+            # "disk","freespace","status"
+            textstr = (
+                item["disk"]
+                + ": freespace "
+                + "{:.2f}".format(item["freespace"])
+                + " Gb"
+            )
+            if item["status"] != "normal":
+                liststr += (
+                    "<li>" + f'<span style="color:red">{textstr}</span>' + "</li>"
+                )
             else:
-               liststr += "<li>"+ textstr + "</li>"
+                liststr += "<li>" + textstr + "</li>"
         htmlstr += f"<ul>{liststr}</ul>"
-    
-    with open(htmlfile,"w") as f:
+
+    with open(htmlfile, "w") as f:
         f.write(htmlstr)
-    
+
     return htmlstr
 
-def sendEmail(statusreport,reportsubject):
+
+def sendEmail(statusreport, reportsubject):
     """send email"""
-    
-    from_email = config['EMAIL']['from_email']
-    to_emails = config['EMAIL']['to_emails']
-    sg_key = config['EMAIL']['SENDGRID_API_KEY']
+
+    from_email = config["EMAIL"]["from_email"]
+    to_emails = config["EMAIL"]["to_emails"]
+    sg_key = config["EMAIL"]["SENDGRID_API_KEY"]
 
     # send to multiple email address
     if "," in to_emails:
@@ -117,23 +149,25 @@ def sendEmail(statusreport,reportsubject):
 
     message = Mail(
         from_email=from_email,
-        to_emails = to_emails,
-        subject = reportsubject,
-        html_content = statusreport )
-    
+        to_emails=to_emails,
+        subject=reportsubject,
+        html_content=statusreport,
+    )
+
     try:
         sg = SendGridAPIClient(sg_key)
         reponse = sg.send(message)
     except Exception as e:
         print(e.message)
-    
+
     return
 
-def sendEmailSMTP(statusreport,reportsubject):
+
+def sendEmailSMTP(statusreport, reportsubject):
     """send email with SMTP server"""
 
-    from_email = config['SMTP']['from_email']
-    to_emails = config['SMTP']['to_emails']
+    from_email = config["SMTP"]["from_email"]
+    to_emails = config["SMTP"]["to_emails"]
 
     # send to multiple email address
     if "," in to_emails:
@@ -142,22 +176,24 @@ def sendEmailSMTP(statusreport,reportsubject):
     from email.message import EmailMessage
 
     msg = EmailMessage()
-    msg['From'] = from_email
-    msg['To'] = to_emails
-    msg['Subject'] = reportsubject
-    msg.set_content('status report')
-    msg.add_alternative(statusreport, subtype='html')
+    msg["From"] = from_email
+    msg["To"] = to_emails
+    msg["Subject"] = reportsubject
+    msg.set_content("status report")
+    msg.add_alternative(statusreport, subtype="html")
 
     import smtplib
-    smtpServer = config['SMTP']['server']
-    smtpPort = config['SMTP']['port']
+
+    smtpServer = config["SMTP"]["server"]
+    smtpPort = config["SMTP"]["port"]
     server = smtplib.SMTP(host=smtpServer, port=smtpPort)
-    if config.has_option('SMTP', 'login'):
-        smtpLogin = config['SMTP']['login']
-        server.login('apikey', smtpLogin)
+    if config.has_option("SMTP", "login"):
+        smtpLogin = config["SMTP"]["login"]
+        server.login("apikey", smtpLogin)
     server.set_debuglevel(1)
     server.send_message(msg)
     server.quit()
+
 
 def checkService():
     """check service status"""
@@ -165,22 +201,22 @@ def checkService():
     status = {}
     today = date.today()
     d1 = today.strftime("%Y%m%d")
-    status['checktime'] = datetime.utcnow().strftime("%Y%m%d, %H:%M:%S")
+    status["checktime"] = datetime.utcnow().strftime("%Y%m%d, %H:%M:%S")
     operation_status = "normal"
 
     for item in monitor_data:
         the_folder = eval("settings." + item + "_SUM_DIR")
-        latest = findLatest(the_folder,"csv")
+        latest = findLatest(the_folder, "csv")
         status[f"{item}_data"] = latest
         adate = extractDate(latest)
         status[f"{item}_data_date"] = adate
         fdays = from_today(adate)
         status[f"{item}_data_status"] = "normal"
 
-        if item in ["GLOFAS","GFMS"] and fdays < -1:
+        if item in ["GLOFAS", "GFMS"] and fdays < -1:
             status[f"{item}_data_status"] = "warning"
             operation_status = "warning"
-        if item in ["DFO","VIIRS"] and fdays < -2:
+        if item in ["DFO", "VIIRS"] and fdays < -2:
             status[f"{item}_data_status"] = "warning"
             operation_status = "warning"
         # hwrf will not show warning
@@ -189,17 +225,17 @@ def checkService():
 
     for item in monitor_mom:
         the_folder = eval("settings." + item + "_MOM_DIR")
-        latest = findLatest(the_folder,"csv")
+        latest = findLatest(the_folder, "csv")
         status[f"{item}_MoM"] = latest
         adate = extractDate(latest)
         status[f"{item}_MoM_date"] = adate
         fdays = from_today(adate)
         status[f"{item}_MoM_status"] = "normal"
-        
-        if item in ["GFMS","HWRF","FINAL"] and fdays < -1:
+
+        if item in ["GFMS", "HWRF", "FINAL"] and fdays < -1:
             status[f"{item}_MoM_status"] = "warning"
             operation_status = "warning"
-        if item in ["DFO","VIIRS"] and fdays < -2:
+        if item in ["DFO", "VIIRS"] and fdays < -2:
             status[f"{item}_MoM_status"] = "warning"
             operation_status = "warning"
 
@@ -207,29 +243,30 @@ def checkService():
     status["checkDisk"] = False
     disk_status = ""
     if config.has_section("DISK"):
-        [disk_status, status['diskstatus']] = checkDisk()
+        [disk_status, status["diskstatus"]] = checkDisk()
         status["checkDisk"] = True
-        
-    #print(status)
+
+    # print(status)
     msg = writeStatus(status, operation_status, disk_status)
     # emailsubject
     email_subject = "Operation: " + operation_status
     if status["checkDisk"]:
         email_subject += " | Disk: " + disk_status
-    
-    # send email 
+
+    # send email
     if config.has_section("EMAIL"):
-        sendEmail(msg,email_subject)
+        sendEmail(msg, email_subject)
 
     if config.has_section("SMTP"):
-        sendEmailSMTP(msg,email_subject)
+        sendEmailSMTP(msg, email_subject)
+
 
 def checkDisk():
-    """ check the disk space"""
+    """check the disk space"""
 
     diskstatusL = []
     disk_status_flag = "normal"
-    for k,v in config.items('DISK'):
+    for k, v in config.items("DISK"):
         disk_label = k
         disk_mount, disk_threshold = v.split(",")
         disk_threshold = float(disk_threshold)
@@ -241,12 +278,16 @@ def checkDisk():
             disk_status_flag = "warning"
         else:
             d_status = "normal"
-        diskstatusL.append({"disk":disk_label,"freespace":freespace,"status":d_status})  
-    
+        diskstatusL.append(
+            {"disk": disk_label, "freespace": freespace, "status": d_status}
+        )
+
     return [disk_status_flag, diskstatusL]
+
 
 def main():
     checkService()
+
 
 if __name__ == "__main__":
     main()
