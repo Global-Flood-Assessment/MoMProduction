@@ -68,7 +68,10 @@ def get_hosturl():
 
 
 def generate_procesing_list():
-    """generate list of date to process"""
+    """generate list of date to process
+    return a dict object
+    {'001': '20230101', '002': '20230102'}
+    """
     hosturl = get_hosturl()
     reqs = requests.get(hosturl)
     soup = BeautifulSoup(reqs.text, "html.parser")
@@ -345,8 +348,6 @@ def DFO_cron():
     """cron job to process DFO"""
 
     datelist = generate_procesing_list()
-    print(datelist)
-    sys.exit()
 
     if len(datelist) == 0:
         logging.info("no new data to process!")
