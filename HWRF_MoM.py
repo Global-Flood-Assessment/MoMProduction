@@ -78,7 +78,7 @@ def update_HWRF_MoM(adate):
         # 	hwrf.2022110906rainfall.csv
         ld_str = hwrf_latest.split(".")[1].replace("rainfall", "")
         h_diff = abs(hour_diff(adate, ld_str))
-        if h_diff < 16:
+        if h_diff <= 6:
             hwrf_sum = os.path.join(
                 settings.HWRF_SUM_DIR, "hwrf.{}rainfall.csv".format(ld_str)
             )
