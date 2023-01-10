@@ -66,6 +66,17 @@ def findLatest(apath, atype):
     return os.path.basename(latest_file)
 
 
+def get_latestitems(afolder, numofitems=7):
+    """get the list of the latest items in a folder"""
+
+    items = sorted(os.listdir(afolder))
+
+    if len(items) < numofitems:
+        return items
+    else:
+        return items[-numofitems:]
+
+
 def url_exits(aurl):
     """test if a url exists"""
     req = requests.get(aurl)
@@ -129,6 +140,12 @@ def main():
     print("==> find latest")
     lastest_csv = findLatest(settings.GLOFAS_SUM_DIR, "csv")
     print(lastest_csv)
+
+    print("==> get lastest items")
+    lastest_items = get_latestitems(settings.HWRF_PROC_DIR)
+    print(lastest_items)
+    lastest_items = get_latestitems(settings.HWRF_SUM_DIR, numofitems=5)
+    print(lastest_items)
 
     print("==> url exist")
     today = date.today()
