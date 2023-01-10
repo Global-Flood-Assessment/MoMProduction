@@ -14,7 +14,7 @@ import pandas as pd
 import scipy.stats
 
 import settings
-from utilities import findLatest, get_latestitems, hour_diff, read_data
+from utilities import findLatest, get_latestitems, hour_diff, read_data, get_current_processing_datehour, hwrf_today
 
 
 def mofunc_hwrf(row):
@@ -1217,6 +1217,12 @@ def batchrun_HWRF_MoM():
         if "Final" in entry and "HWRFUpdated" in entry:
             testdate = entry.split("_")[2].replace("HWRFUpdated.csv", "")
             datelist.append(testdate)
+
+    # get current processing hour
+    curdatestr = get_current_processing_datehour()
+    # check if there is the hwrf data for this hour
+    if not hwrf_today(adate=curdatestr[:8], ahour=curdatestr[-2:]):
+        datelist.append(curdatestr)
 
     list_set = set(datelist)
     unique_dates = list(list_set)
