@@ -1221,8 +1221,6 @@ def batchrun_HWRF_MoM():
     list_set = set(datelist)
     unique_dates = list(list_set)
     unique_dates.sort()
-    print(unique_dates)
-    sys.exit()
 
     for testdate in unique_dates:
         # update_HWRF_MoM(testdate)
