@@ -353,8 +353,9 @@ def HWRF_cron():
         logging.info("processing " + newtiff)
         [hwrfcsv, dataflag] = HWRF_extract_by_watershed(newtiff)
         if not dataflag:
-            logging.info("no data: " + hwrfcsv)
-            continue
+            logging.info("no data, not generated: " + hwrfcsv)
+            # if no csv produced, it shall just conitune to produce MoM output
+            # continue
         logging.info("generated: " + hwrfcsv)
 
         # run MoM update
