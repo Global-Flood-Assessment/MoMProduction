@@ -14,7 +14,7 @@ import pandas as pd
 import scipy.stats
 
 import settings
-from utilities import findLatest, hour_diff, read_data
+from utilities import findLatest, get_latestitems, hour_diff, read_data
 
 
 def mofunc_hwrf(row):
@@ -1200,20 +1200,20 @@ def batchrun_HWRF_MoM():
     # collect all dates
     # first scan hwrf_summary folder
     datelist = []
-    for entry in sorted(os.listdir(settings.HWRF_SUM_DIR)):
+    for entry in get_latestitems(settings.HWRF_SUM_DIR):
         if "rainfall.csv" in entry:
             testdate = entry.split(".")[1].replace("rainfall", "")
             datelist.append(testdate)
 
     # scan raw data folder
-    for entry in sorted(os.listdir(settings.HWRF_PROC_DIR)):
+    for entry in get_latestitems(settings.HWRF_PROC_DIR):
         # hwrf.2021092112rainfall.zip
         if ".zip" in entry:
             testdate = entry.split(".")[1].replace("rainfall", "")
             datelist.append(testdate)
 
     # also scan mom folder
-    for entry in sorted(os.listdir(settings.HWRF_MOM_DIR)):
+    for entry in get_latestitems(settings.HWRF_MOM_DIR):
         if "Final" in entry and "HWRFUpdated" in entry:
             testdate = entry.split("_")[2].replace("HWRFUpdated.csv", "")
             datelist.append(testdate)
@@ -1221,6 +1221,8 @@ def batchrun_HWRF_MoM():
     list_set = set(datelist)
     unique_dates = list(list_set)
     unique_dates.sort()
+    print(unique_dates)
+    sys.exit()
 
     for testdate in unique_dates:
         # update_HWRF_MoM(testdate)
