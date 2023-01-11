@@ -12,6 +12,8 @@ import shutil
 import subprocess
 import sys
 import zipfile
+    
+from datetime import datetime
 
 import geopandas as gpd
 import numpy as np
@@ -49,14 +51,12 @@ def check_status(adate):
 def check_hours(adate):
     """check if it is too early to process"""
     # adate in YYYYMMDDHH
-    TIME_DELDAY = 6  # hours
-    from datetime import datetime
 
     ct = datetime.now()
     da = datetime.strptime(adate, "%Y%m%d%H")
     delta = ct - da
-    dhours = int(delta.total_seconds() / 3600)
-    if dhours > TIME_DELDAY:
+    dhours = delta.total_seconds() / 3600.0
+    if dhours > settings.HWRF_TIME_DELAY:
         return False
     else:
         return True
