@@ -63,7 +63,9 @@ def final_alert_pdc(adate):
     fAlert = os.path.join(settings.FINAL_MOM, fAlert)
     # check if final alert is already generatated
     if os.path.exists(fAlert):
-        return
+        # for debug
+        os.remove(fAlert)
+        # return
 
     [aAlert, pAlert] = find_pair_HWRFoutput(adate)
     if aAlert == "" or pAlert == "":
@@ -152,9 +154,11 @@ def final_alert_pdc(adate):
     )
 
     # drop FID if it has
-    if "FID" in PDC_Alert.columns:
-        print("drop FID column")
-        PDC_Alert = PDC_Alert.drop(["FID"], axis=1)
+    FIDcolumns = [x for x in PDC_Alert.columns if "FID" in x]
+    print(FIDcolumns)
+    if len(FIDcolumns) > 0:
+        print("drop FIDs column")
+        PDC_Alert = PDC_Alert.drop(FIDcolumns, axis=1)
 
     PDC_Alert.to_csv(fAlert, encoding="Windows-1252")
     logging.info("generated final alert:" + fAlert)
