@@ -1229,9 +1229,6 @@ def batchrun_HWRF_MoM():
     unique_dates.sort()
 
     for testdate in unique_dates:
-        # update_HWRF_MoM(testdate)
-        # update_HWRFMoM_DFO_VIIRS(testdate)
-        # final_alert_pdc(testdate)
         hwrf_workflow(testdate)
 
     return
@@ -1239,11 +1236,6 @@ def batchrun_HWRF_MoM():
 
 def main():
     # run batch mode
-    # testdate = '2021120406'
-    # the following three function is replaced by hwrf_workflow
-    # update_HWRF_MoM(testdate)
-    # update_HWRFMoM_DFO_VIIRS(testdate)
-    # final_alert_pdc(testdate)
     batchrun_HWRF_MoM()
 
 
