@@ -27,7 +27,7 @@ from shapely.geometry import Point
 
 import settings
 from HWRF_MoM import hwrf_workflow
-from utilities import get_current_processing_datehour, watersheds_gdb_reader
+from utilities import get_current_processing_datehour, hwrf_today, watersheds_gdb_reader
 
 
 def check_status(adate):
