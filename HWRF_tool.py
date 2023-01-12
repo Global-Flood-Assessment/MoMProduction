@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import sys
 import zipfile
-    
 from datetime import datetime
 
 import geopandas as gpd
@@ -28,7 +27,7 @@ from shapely.geometry import Point
 
 import settings
 from HWRF_MoM import hwrf_workflow
-from utilities import watersheds_gdb_reader
+from utilities import get_current_processing_datehour, watersheds_gdb_reader
 
 
 def check_status(adate):
@@ -336,7 +335,16 @@ def HWRF_cron():
 
     if len(datelist) == 0:
         logging.info("no new data to process!")
-        sys.exit(0)
+        # get current processing hour
+        curdatestr = get_current_processing_datehour(
+            time_delay=settings.HWRF_TIME_DELAY
+        )
+        # check if there is the hwrf data for this hour
+        if not hwrf_today(adate=curdatestr[:8], ahour=curdatestr[-2:]):
+            logging.info("no HRWRF data, run " + curdatestr)
+            hwrf_workflow(curdatestr)
+
+        return
 
     # switch to processing folder
     os.chdir(settings.HWRF_PROC_DIR)
