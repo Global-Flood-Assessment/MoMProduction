@@ -1274,6 +1274,7 @@ def batchrun_HWRF_MoM():
             datelist.append(testdate)
 
     # get current processing hour
+    # this code is also in HWRF_cron(), no harm to keep it here
     curdatestr = get_current_processing_datehour(time_delay=settings.HWRF_TIME_DELAY)
     # check if there is the hwrf data for this hour
     if not hwrf_today(adate=curdatestr[:8], ahour=curdatestr[-2:]):

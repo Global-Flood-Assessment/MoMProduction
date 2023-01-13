@@ -2,7 +2,7 @@
 main script to run various MoM processing jobs
 """
 
-prolog="""
+prolog = """
 **PROGRAM**
     MoM_run.py
       
@@ -11,7 +11,7 @@ prolog="""
 
 **USAGE**
 """
-epilog="""
+epilog = """
 **EXAMPLE**
     MoM_run.py 
                
@@ -19,25 +19,45 @@ epilog="""
 
 import argparse
 import logging
-from settings import *
 
-from GFMS_tool import GFMS_cron, GFMS_fixdate
-from HWRF_tool import HWRF_cron
+from DFO_MoM import batchrun_DFO_MoM
 from DFO_tool import DFO_cron
+from GFMS_tool import GFMS_cron, GFMS_fixdate
+from HWRF_MoM import batchrun_HWRF_MoM
+from HWRF_tool import HWRF_cron
+from settings import *
+from VIIRS_MoM import batchrun_VIIRS_MoM
 from VIIRS_tool import VIIRS_cron
 
-from HWRF_MoM import batchrun_HWRF_MoM
-from DFO_MoM import batchrun_DFO_MoM
-from VIIRS_MoM import batchrun_VIIRS_MoM
 
 def _getParser():
-    parser = argparse.ArgumentParser(description=prolog,epilog=epilog,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    joblist = ['GFMS','HWRF','HWRF_MOM','DFO','DFO_MOM','VIIRS','VIIRS_MOM']
-    parser.add_argument('-j','--job', action='store', type=str.upper, dest='job',required=True,help='run a job',choices=joblist)
-    parser.add_argument('-fd','--fixdate',action='store', dest='adate',required=False,help='fix a date')
+    parser = argparse.ArgumentParser(
+        description=prolog,
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    joblist = ["GFMS", "HWRF", "HWRF_MOM", "DFO", "DFO_MOM", "VIIRS", "VIIRS_MOM"]
+    parser.add_argument(
+        "-j",
+        "--job",
+        action="store",
+        type=str.upper,
+        dest="job",
+        required=True,
+        help="run a job",
+        choices=joblist,
+    )
+    parser.add_argument(
+        "-fd",
+        "--fixdate",
+        action="store",
+        dest="adate",
+        required=False,
+        help="fix a date",
+    )
 
     return parser
+
 
 def run_job(cronjob):
     """run various cron job"""
@@ -56,9 +76,10 @@ def run_job(cronjob):
     else:
         return
 
+
 def run_fixdate(cronjob, adate):
     """run fixdate funtion"""
-    logging.info("run fixdate {} {}".format(cronjob,adate))
+    logging.info("run fixdate {} {}".format(cronjob, adate))
     if cronjob == "GFMS":
         GFMS_fixdate(adate)
     elif cronjob == "VIIRS":
@@ -73,10 +94,10 @@ def main():
     parser = _getParser()
     results = parser.parse_args()
     if results.adate:
-        run_fixdate(results.job,results.adate)
+        run_fixdate(results.job, results.adate)
     else:
         run_job(results.job)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
-    

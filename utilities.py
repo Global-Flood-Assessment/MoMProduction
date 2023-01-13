@@ -105,18 +105,20 @@ def hwrf_today(adate="", ahour=""):
     has_data = url_exits(turl)
     return has_data
 
-def get_current_processing_datehour(time_delay = 6):
+
+def get_current_processing_datehour(time_delay=6):
     """get the current processing datehour with a time-delay
-         -- time_delay(in hours)
-         -- return YYYYMMDDHH (hour in 00, 06, 12, 18)
+    -- time_delay(in hours)
+    -- return YYYYMMDDHH (hour in 00, 06, 12, 18)
     """
     # get current time
     ct = datetime.now()
-    dt = ct - timedelta(hours = time_delay)
+    dt = ct - timedelta(hours=time_delay)
     # integer division
     ahour = (dt.hour // 6) * 6
     adatestr = dt.strftime("%Y%m%d") + str(ahour).zfill(2)
     return adatestr
+
 
 def main():
     """test routines"""
@@ -183,7 +185,11 @@ def main():
     print("==> get current processing datehour")
     print("current time: ", datetime.now())
     print("current processing datehour: ", get_current_processing_datehour())
-    print("current processing datehour with 3 hour delay: ", get_current_processing_datehour(time_delay=3))
+    print(
+        "current processing datehour with 3 hour delay: ",
+        get_current_processing_datehour(time_delay=3),
+    )
+
 
 if __name__ == "__main__":
     main()
