@@ -15,8 +15,6 @@ import pandas as pd
 import scipy.stats
 
 import settings
-
-# from HWRF_MoM import update_HWRF_MoM
 from HWRF_MoM import hwrf_workflow
 from utilities import read_data
 
@@ -68,7 +66,6 @@ def update_DFO_MoM(adate):
         )
         if not os.path.exists(MOMOutput):
             logging.info("force generate HWRF :" + MOMOutput)
-            # update_HWRF_MoM(adate+hh0)
             hwrf_workflow(adate + hh0)
     MOMOutput = os.path.join(
         settings.HWRF_MOM_DIR, "Final_Attributes_{}{}HWRFUpdated.csv".format(adate, hh)

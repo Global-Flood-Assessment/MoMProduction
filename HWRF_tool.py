@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import zipfile
+from datetime import datetime
 
 import geopandas as gpd
 import numpy as np
@@ -25,10 +26,8 @@ from rasterio.mask import mask
 from shapely.geometry import Point
 
 import settings
-
-# from HWRF_MoM import update_HWRF_MoM, update_HWRFMoM_DFO_VIIRS, final_alert_pdc
 from HWRF_MoM import hwrf_workflow
-from utilities import watersheds_gdb_reader
+from utilities import get_current_processing_datehour, hwrf_today, watersheds_gdb_reader
 
 
 def check_status(adate):
@@ -51,14 +50,12 @@ def check_status(adate):
 def check_hours(adate):
     """check if it is too early to process"""
     # adate in YYYYMMDDHH
-    TIME_DELDAY = 6  # hours
-    from datetime import datetime
 
     ct = datetime.now()
     da = datetime.strptime(adate, "%Y%m%d%H")
     delta = ct - da
-    dhours = int(delta.total_seconds() / 3600)
-    if dhours > TIME_DELDAY:
+    dhours = delta.total_seconds() / 3600.0
+    if dhours > settings.HWRF_TIME_DELAY:
         return False
     else:
         return True
@@ -338,7 +335,16 @@ def HWRF_cron():
 
     if len(datelist) == 0:
         logging.info("no new data to process!")
-        sys.exit(0)
+        # get current processing hour
+        curdatestr = get_current_processing_datehour(
+            time_delay=settings.HWRF_TIME_DELAY
+        )
+        # check if there is the hwrf data for this hour
+        if not hwrf_today(adate=curdatestr[:8], ahour=curdatestr[-2:]):
+            logging.info("no HRWRF data, run " + curdatestr)
+            hwrf_workflow(curdatestr)
+
+        return
 
     # switch to processing folder
     os.chdir(settings.HWRF_PROC_DIR)
@@ -355,15 +361,13 @@ def HWRF_cron():
         logging.info("processing " + newtiff)
         [hwrfcsv, dataflag] = HWRF_extract_by_watershed(newtiff)
         if not dataflag:
-            logging.info("no data: " + hwrfcsv)
-            continue
+            logging.info("no data, not generated: " + hwrfcsv)
+            # if no csv produced, it shall just conitune to produce MoM output
+            # continue
         logging.info("generated: " + hwrfcsv)
 
         # run MoM update
         testdate = key
-        # update_HWRF_MoM(testdate)
-        # update_HWRFMoM_DFO_VIIRS(testdate)
-        # final_alert_pdc(testdate)
         hwrf_workflow(testdate)
 
     os.chdir(settings.BASE_DIR)

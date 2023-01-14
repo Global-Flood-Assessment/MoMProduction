@@ -14,7 +14,14 @@ import pandas as pd
 import scipy.stats
 
 import settings
-from utilities import findLatest, hour_diff, read_data
+from utilities import (
+    findLatest,
+    get_current_processing_datehour,
+    get_latestitems,
+    hour_diff,
+    hwrf_today,
+    read_data,
+)
 
 
 def mofunc_hwrf(row):
@@ -78,7 +85,7 @@ def update_HWRF_MoM(adate):
         # 	hwrf.2022110906rainfall.csv
         ld_str = hwrf_latest.split(".")[1].replace("rainfall", "")
         h_diff = abs(hour_diff(adate, ld_str))
-        if h_diff < 16:
+        if h_diff <= 6:
             hwrf_sum = os.path.join(
                 settings.HWRF_SUM_DIR, "hwrf.{}rainfall.csv".format(ld_str)
             )
@@ -1092,26 +1099,20 @@ def update_HWRFMoM_DFO_VIIRS(adate):
     return
 
 
-def final_alert_pdc(adate):
-    """final alert"""
-
-    fAlert = "Final_Attributes_{}HWRF+MOM+DFO+VIIRSUpdated_PDC.csv".format(adate)
-    fAlert = os.path.join(settings.FINAL_MOM, fAlert)
-    if os.path.exists(fAlert):
-        # print(fAlert)
-        return
-
+def find_pair_HWRFoutput(adate):
+    """return pair of HWRF Mom output
+    [MoM_adate, MoM_1daybefore]
+    if not found: ["",""]
+    """
     # first find the hwrf hour output
     hwrfh_list = glob.glob(os.path.join(settings.HWRF_MOM_DIR, "Final*.csv"))
     # Final_Attributes_2021102800HWRF+20211028DFO+20211027VIIRSUpdated.csv
     matching = [s for s in hwrfh_list if adate + "HWRF+" in s]
     if len(matching) < 1:
-        # print("not found " + adate)
-        return
-    # else:
-    #     print(matching[0])
+        return ["", ""]
 
-    aAlert = matching[0]
+    MoM_adate = matching[0]
+
     # generate string from the previous day
     # turn the datestr into a real date
     datestr = adate[:-2]
@@ -1124,51 +1125,98 @@ def final_alert_pdc(adate):
     matching = [s for s in hwrfh_list if pdate + "HWRF+" in s]
     # no previous date
     if len(matching) < 1:
-        # shall call the function to generate it
-        # print("not found " + pdate)
-        return
-    # else:
-    #     print(matching[0])
+        return [MoM_adate, ""]
 
-    pAlert = matching[0]
+    MoM_1daybefore = matching[0]
+
+    return [MoM_adate, MoM_1daybefore]
+
+
+def final_alert_pdc(adate):
+    """generate final alert"""
+
+    fAlert = "Final_Attributes_{}HWRF+MOM+DFO+VIIRSUpdated_PDC.csv".format(adate)
+    fAlert = os.path.join(settings.FINAL_MOM, fAlert)
+    # check if final alert is already generatated
+    if os.path.exists(fAlert):
+        return
+
+    [aAlert, pAlert] = find_pair_HWRFoutput(adate)
+    if aAlert == "" or pAlert == "":
+        logging.warning(f"mathing HWRF output is not found: {adate}")
+        return
 
     mapping = {"Information": 1, "Advisory": 2, "Watch": 3, "Warning": 4}
-    PA = read_data(pAlert)
-    CA = read_data(aAlert)
-    CA["Status"] = ""
-    PA = PA.replace({"Alert": mapping})
-    CA = CA.replace({"Alert": mapping})
+    # read data
+    pa_df = read_data(pAlert)
+    # for PA, the only two columns needed
+    pa_df = pa_df[["pfaf_id", "Alert"]]
+    ca_df = read_data(aAlert)
+    pa_df = pa_df.replace({"Alert": mapping})
+    ca_df = ca_df.replace({"Alert": mapping})
 
-    pfaf_ID = set(CA["pfaf_id"].tolist())
+    # rename Alert in the previous day as Alert_0
+    pa_df.rename(columns={"Alert": "Alert_0"}, inplace=True)
+    # join two df by pfaf_id
+    joined_df = ca_df.set_index("pfaf_id").join(pa_df.set_index("pfaf_id"))
 
-    for i in pfaf_ID:
-        # print(i)
-        if i in PA.values:
-            PAlert = PA.loc[PA["pfaf_id"] == i, "Alert"].item()
-        else:
-            PAlert = 5
-        CAlert = CA.loc[CA["pfaf_id"] == i, "Alert"].item()
-        if PAlert == 5:
-            CA.loc[CA["pfaf_id"] == i, "Status"] = "New"
-        elif PAlert == CAlert:
-            CA.loc[CA["pfaf_id"] == i, "Status"] = "Continued"
-        elif CAlert > PAlert:
-            CA.loc[CA["pfaf_id"] == i, "Status"] = "Upgraded"
-        elif (CAlert < PAlert) & (PAlert != 5):
-            CA.loc[CA["pfaf_id"] == i, "Status"] = "Downgraded"
+    # check the value of Alert_0
+    # expected value: [ 1.  2. nan  3.  4.]
+    # print(joined_df["Alert_0"].unique())
+    # replace nan value as 5
+    joined_df["Alert_0"] = joined_df["Alert_0"].fillna(5)
+    # force it int
+    joined_df = joined_df.astype({"Alert_0": int})
+    # expected value Alert_0: [1 2 3 4 5]
+    # print(joined_df["Alert_0"].unique())
+    # expected value Alert: [1 2 3 4]
+    # print(joined_df["Alert"].unique())
+
+    # a new Status column based on Alert and Alert_0
+    # Alert_0 = 5: "New"
+    # Alert = Alert_0: "Continued"
+    # Alert > Alert_0: "Upgraded"
+    # Alert < Alert_0: "Downgraded"
+    conditions = [
+        (joined_df["Alert_0"] == 5),
+        (joined_df["Alert"] == joined_df["Alert_0"]),
+        (joined_df["Alert"] > joined_df["Alert_0"]),
+        (joined_df["Alert"] < joined_df["Alert_0"]),
+    ]
+    actions = ["New", "Continued", "Upgraded", "Downgraded"]
+    joined_df["Status"] = np.select(conditions, actions, default="Other")
+    # print(joined_df["Status"].unique())
 
     mapping = {1: "Information", 2: "Advisory", 3: "Watch", 4: "Warning"}
-    CA = CA.replace({"Alert": mapping})
+    joined_df = joined_df.replace({"Alert": mapping})
 
-    CA = CA.drop(
-        ["Admin0", "Admin1", "ISO", "Resilience_Index", " NormalizedLackofResilience "],
+    # delete columns
+    joined_df = joined_df.drop(
+        [
+            "Admin0",
+            "Admin1",
+            "ISO",
+            "Resilience_Index",
+            " NormalizedLackofResilience ",
+            "Alert_0",
+        ],
         axis=1,
     )
+
+    # drop FID if it has
+    if "FID" in joined_df.columns:
+        print("drop FID column")
+        joined_df = joined_df.drop(["FID"], axis=1)
+
+    # load admin data
     Union_Attributes = pd.read_csv(
         os.path.join(settings.BASE_DATA_DIR, "Admin0_1_union_centroid.csv"),
         encoding="Windows-1252",
     )
-    PDC_Alert = pd.merge(Union_Attributes, CA, on="pfaf_id", how="inner")
+
+    # reset index
+    joined_df = joined_df.reset_index(level=0)
+    PDC_Alert = pd.merge(Union_Attributes, joined_df, on="pfaf_id", how="inner")
     # print(PDC_Alert)
     PDC_Alert.drop(
         PDC_Alert.index[
@@ -1178,7 +1226,14 @@ def final_alert_pdc(adate):
         ],
         inplace=True,
     )
-    PDC_Alert = PDC_Alert.drop(["FID_x", "FID_y"], axis=1)
+
+    # drop FID if it has
+    FIDcolumns = [x for x in PDC_Alert.columns if "FID" in x]
+    # print(FIDcolumns)
+    if len(FIDcolumns) > 0:
+        print("drop FIDs column")
+        PDC_Alert = PDC_Alert.drop(FIDcolumns, axis=1)
+
     PDC_Alert.to_csv(fAlert, encoding="Windows-1252")
     logging.info("generated final alert:" + fAlert)
 
@@ -1186,7 +1241,9 @@ def final_alert_pdc(adate):
 
 
 def hwrf_workflow(adate):
-    """the hwrf workflow on a date"""
+    """the hwrf workflow on a date
+    to simplify the call from the other scripts
+    """
     update_HWRF_MoM(adate)
     update_HWRFMoM_DFO_VIIRS(adate)
     final_alert_pdc(adate)
@@ -1198,32 +1255,36 @@ def batchrun_HWRF_MoM():
     # collect all dates
     # first scan hwrf_summary folder
     datelist = []
-    for entry in sorted(os.listdir(settings.HWRF_SUM_DIR)):
+    for entry in get_latestitems(settings.HWRF_SUM_DIR):
         if "rainfall.csv" in entry:
             testdate = entry.split(".")[1].replace("rainfall", "")
             datelist.append(testdate)
 
     # scan raw data folder
-    for entry in sorted(os.listdir(settings.HWRF_PROC_DIR)):
+    for entry in get_latestitems(settings.HWRF_PROC_DIR):
         # hwrf.2021092112rainfall.zip
         if ".zip" in entry:
             testdate = entry.split(".")[1].replace("rainfall", "")
             datelist.append(testdate)
 
     # also scan mom folder
-    for entry in sorted(os.listdir(settings.HWRF_MOM_DIR)):
+    for entry in get_latestitems(settings.HWRF_MOM_DIR):
         if "Final" in entry and "HWRFUpdated" in entry:
             testdate = entry.split("_")[2].replace("HWRFUpdated.csv", "")
             datelist.append(testdate)
+
+    # get current processing hour
+    # this code is also in HWRF_cron(), no harm to keep it here
+    curdatestr = get_current_processing_datehour(time_delay=settings.HWRF_TIME_DELAY)
+    # check if there is the hwrf data for this hour
+    if not hwrf_today(adate=curdatestr[:8], ahour=curdatestr[-2:]):
+        datelist.append(curdatestr)
 
     list_set = set(datelist)
     unique_dates = list(list_set)
     unique_dates.sort()
 
     for testdate in unique_dates:
-        # update_HWRF_MoM(testdate)
-        # update_HWRFMoM_DFO_VIIRS(testdate)
-        # final_alert_pdc(testdate)
         hwrf_workflow(testdate)
 
     return
@@ -1231,10 +1292,6 @@ def batchrun_HWRF_MoM():
 
 def main():
     # run batch mode
-    # testdate = '2021120406'
-    # update_HWRF_MoM(testdate)
-    # update_HWRFMoM_DFO_VIIRS(testdate)
-    # final_alert_pdc(testdate)
     batchrun_HWRF_MoM()
 
 
