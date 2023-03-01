@@ -30,10 +30,10 @@ from utilities import read_data, watersheds_gdb_reader
 from VIIRS_MoM import update_VIIRS_MoM
 
 
-def generate_adate():
+def generate_adate(delay=1):
     """generate 1 day delay date"""
 
-    previous_date = datetime.datetime.today() - datetime.timedelta(days=1)
+    previous_date = datetime.datetime.today() - datetime.timedelta(days=delay)
 
     adate_str = previous_date.strftime("%Y%m%d")
 
@@ -227,15 +227,9 @@ def VIIRS_extract_by_watershed(adate, tiffs):
     return
 
 
-def VIIRS_cron(adate=""):
-    """main cron script"""
-
-    # global basepath
-    # basepath = os.path.dirname(os.path.abspath(__file__))
-    # load_config()
-
-    if adate == "":
-        adate = generate_adate()
+def VIIRS_run_adate(adate):
+    """try to process VIIRS on a cerntain date
+    -- this part of code is moved from VIIRS_cron"""
 
     if check_status(adate):
         logging.info("already processed: " + adate)
@@ -259,6 +253,23 @@ def VIIRS_cron(adate=""):
     update_VIIRS_MoM(adate)
 
     os.chdir(settings.BASE_DIR)
+
+
+def VIIRS_cron(adate=""):
+    """main cron script"""
+
+    # global basepath
+    # basepath = os.path.dirname(os.path.abspath(__file__))
+    # load_config()
+
+    if adate == "":
+        # check two days
+        adate = generate_adate(delay=2)
+        VIIRS_run_adate(adate)
+        adate = generate_adate(delay=1)
+        VIIRS_run_adate(adate)
+    else:
+        VIIRS_run_adate(adate)
 
     return
 
