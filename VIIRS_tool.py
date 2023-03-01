@@ -268,6 +268,8 @@ def VIIRS_cron(adate=""):
         VIIRS_run_adate(adate)
         adate = generate_adate(delay=1)
         VIIRS_run_adate(adate)
+        # adate = generate_adate(delay=0)
+        # VIIRS_run_adate(adate)
     else:
         VIIRS_run_adate(adate)
 
