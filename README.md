@@ -47,7 +47,7 @@ All the python commands after this part are running in this environment.
 Check if zip, wget, gdal are installed.  
 Install the packages if not available:
 ```
-sudo apt install gdal_bin 
+sudo apt install gdal-bin 
 ```
 ## 2. Initialize the setup
 Please copy [sample_production.cfg](https://github.com/Global-Flood-Assessment/MoMProduction/blob/main/sample_production.cfg) to **production.cfg**, or run initialize.py, it will do the copy.  
