@@ -8,7 +8,7 @@ Two main function:
     * DFO_cron_fix: rerun cron-job for a given date
 """
 
-
+import argparse
 import csv
 import json
 import logging
@@ -370,9 +370,28 @@ def DFO_cron():
 
     return
 
+def DFO_fixdate(adate):
+    """process a specific date"""
+    print(adate)
 
+    # first check if the date is fixable
+    datelist = generate_procesing_list()
+
+    if adate not in datelist.values():
+        print("date not in the available data list or already processed!")
+        print("list of available dates:", list(datelist.values()))
+        sys.exit(0)
+    
 def main():
-    DFO_cron()
+    """main function"""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-fd','--fixdate', dest='fixdate', type=str, help="try to process a specific date")
+
+    args = parser.parse_args()
+    if args.fixdate:
+        DFO_fixdate(args.fixdate)
+    else:
+        DFO_cron()
 
 
 if __name__ == "__main__":
