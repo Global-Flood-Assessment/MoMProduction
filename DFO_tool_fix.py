@@ -73,7 +73,7 @@ def generate_procesing_list():
     {'001': '20230101', '002': '20230102'}
     """
     hosturl = get_hosturl()
-    reqs = requests.get(hosturl, timeout = 10)
+    reqs = requests.get(hosturl, timeout = 20)
     soup = BeautifulSoup(reqs.text, "html.parser")
     cur_year = hosturl[-4:]
     datelist = {}
@@ -382,6 +382,25 @@ def DFO_fixdate(adate):
         print("list of available dates:", list(datelist.values()))
         sys.exit(0)
     
+    key = [k for k, v in datelist.items() if v == adate][0]
+    # form a new datelist
+    datelist = {key: adate}
+    #print(datelist)
+
+    for key in datelist:
+        logging.info("try to fix a date: " + datelist[key])
+        logging.info("download: " + key)
+        dfo_download(key)
+        logging.info("download finished!")
+        logging.info("processing: " + key)
+        # process data
+        # key: folder name
+        # datelist[key]: real date
+        DFO_process(key, datelist[key])
+        # run DFO_MoM
+        update_DFO_MoM(datelist[key])
+        logging.info("processing finished: " + key)
+
 def main():
     """main function"""
     parser = argparse.ArgumentParser(description=__doc__)
