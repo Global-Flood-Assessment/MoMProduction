@@ -233,6 +233,13 @@ def DFO_process(folder, adate):
         "Flood 2-Day 250m",
         "Flood 3-Day 250m",
     ]
+    # new layer name mapping
+    floodsubdataset = {
+            "Flood 1-Day 250m":"Flood_1Day_250m",
+            "Flood 1-Day CS 250m":"FloodCS_1Day_250m",
+            "Flood 2-Day 250m":"Flood_2Day_250m",
+            "Flood 3-Day 250m":"Flood_3Day_250m",
+            }
     # create sub folder if necessary
     for flood in floodlayer:
         subfolder = flood.replace(" ", "_")
@@ -267,10 +274,11 @@ def DFO_process(folder, adate):
     vrt_list = []
     for flood in floodlayer:
         subfolder = flood.replace(" ", "_")
+        subdataset = floodsubdataset[flood]
         # geotiff convert
         for HDF in hdffiles:
             nameprefix = "_".join(HDF.split(".")[1:3])
-            inputlayer = f'HDF4_EOS:EOS_GRID:"{HDF}":Grid_Water_Composite:"{flood}"'
+            inputlayer = f'HDF4_EOS:EOS_GRID:"{HDF}":Grid_Water_Composite:{subdataset}'
             tiff = nameprefix + "_" + subfolder
             outputtiff = os.path.join(subfolder, tiff + ".tiff")
             if not os.path.exists(outputtiff):
