@@ -34,8 +34,8 @@ from utilities import from_today, watersheds_gdb_reader
 # from progressbar import progress
 
 # total number of hdf files
-DFO_TOTAL_TILES = 223
-DFO_MINIMUM_TILES = 221
+DFO_TOTAL_TILES = 287
+DFO_MINIMUM_TILES = 280
 
 
 def get_real_date(year, day_num):
