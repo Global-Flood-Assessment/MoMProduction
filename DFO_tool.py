@@ -34,8 +34,8 @@ from utilities import from_today, watersheds_gdb_reader
 # from progressbar import progress
 
 # total number of hdf files
-DFO_TOTAL_TILES = 223
-DFO_MINIMUM_TILES = 221
+DFO_TOTAL_TILES = 287
+DFO_MINIMUM_TILES = 280
 
 
 def get_real_date(year, day_num):
@@ -111,11 +111,11 @@ def dfo_download(subfolder):
 
     dfokey = config.get("dfo", "TOKEN")
     dataurl = os.path.join(get_hosturl(), subfolder)
-    wgetcmd = 'wget -r --no-parent -R .html,.tmp -nH -l1 --cut-dirs=8 {dataurl} --header "Authorization: Bearer {key}" -P {downloadfolder}'
+    wgetcmd = 'wget -e robots=off -r --no-parent -R .html,.tmp -nH -l1 --cut-dirs=8 {dataurl} --header "Authorization: Bearer {key}" -P {downloadfolder}'
     wgetcmd = wgetcmd.format(dataurl=dataurl, key=dfokey, downloadfolder=DFO_PROC_DIR)
     # print(wgetcmd)
     exitcode = subprocess.call(wgetcmd, shell=True)
-    if not exitcode == 0:
+    if not (exitcode == 0 or exitcode ==8):
         # something wrong with downloading
         logging.warning("download failed: " + dataurl)
         sys.exit()
