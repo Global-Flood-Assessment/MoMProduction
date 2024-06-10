@@ -111,11 +111,11 @@ def dfo_download(subfolder):
 
     dfokey = config.get("dfo", "TOKEN")
     dataurl = os.path.join(get_hosturl(), subfolder)
-    wgetcmd = 'wget -r --no-parent -R .html,.tmp -nH -l1 --cut-dirs=8 {dataurl} --header "Authorization: Bearer {key}" -P {downloadfolder}'
+    wgetcmd = 'wget -e robots=off -r --no-parent -R .html,.tmp -nH -l1 --cut-dirs=8 {dataurl} --header "Authorization: Bearer {key}" -P {downloadfolder}'
     wgetcmd = wgetcmd.format(dataurl=dataurl, key=dfokey, downloadfolder=DFO_PROC_DIR)
     # print(wgetcmd)
     exitcode = subprocess.call(wgetcmd, shell=True)
-    if not exitcode == 0:
+    if not (exitcode == 0 or exitcode ==8):
         # something wrong with downloading
         logging.warning("download failed: " + dataurl)
         sys.exit()
