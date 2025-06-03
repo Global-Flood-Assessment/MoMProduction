@@ -1,6 +1,6 @@
 """
-    HWRF_tool.py
-        -- cron job script for HWRF data
+HWRF_tool.py
+    -- cron job script for HWRF data
 """
 
 import csv
@@ -65,39 +65,51 @@ def generate_procesing_list():
     """generate the processing list"""
 
     hosturl = settings.config.get("hwrf", "HOST")
-    reqs = requests.get(hosturl)
-    soup = BeautifulSoup(reqs.text, "html.parser")
 
-    datelist = {}
-    for link in soup.find_all("a"):
-        fstr = link.string
-        if fstr[:5] == "hwrf.":
-            a_entry = fstr.split(".")[1]
-            a_entry = a_entry.replace("/", "")
-            datelist[a_entry] = hosturl + fstr
+    # Check if the host URL is accessible
+    from utilities import url_exits
 
-    # first level output
-    # {'20220712': 'https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20220712/', '20220713': 'https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20220713/'}
-    # extract second level
+    if not url_exits(hosturl):
+        logging.info(f"Host URL {hosturl} is not accessible")
+        return {}  # Return an empty dictionary if URL isn't reachable
 
-    dataurllist = {}
-    for key in datelist.keys():
-        hosturl = datelist[key]
+    try:
         reqs = requests.get(hosturl)
         soup = BeautifulSoup(reqs.text, "html.parser")
+
+        datelist = {}
         for link in soup.find_all("a"):
             fstr = link.string
-            hhstr = fstr.replace("/", "")
-            if hhstr in ["00", "06", "12", "18"]:
-                a_entry = key + hhstr
-                if check_status(a_entry):
-                    continue
-                # check if it is too early to process the data
-                if check_hours(a_entry):
-                    continue
-                dataurllist[a_entry] = os.path.join(hosturl, fstr)
+            if fstr[:5] == "hwrf.":
+                a_entry = fstr.split(".")[1]
+                a_entry = a_entry.replace("/", "")
+                datelist[a_entry] = hosturl + fstr
 
-    return dataurllist
+        # first level output
+        # {'20220712': 'https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20220712/', '20220713': 'https://ftpprd.ncep.noaa.gov/data/nccf/com/hwrf/prod/hwrf.20220713/'}
+        # extract second level
+
+        dataurllist = {}
+        for key in datelist.keys():
+            hosturl = datelist[key]
+            reqs = requests.get(hosturl)
+            soup = BeautifulSoup(reqs.text, "html.parser")
+            for link in soup.find_all("a"):
+                fstr = link.string
+                hhstr = fstr.replace("/", "")
+                if hhstr in ["00", "06", "12", "18"]:
+                    a_entry = key + hhstr
+                    if check_status(a_entry):
+                        continue
+                    # check if it is too early to process the data
+                    if check_hours(a_entry):
+                        continue
+
+        return dataurllist
+
+    except requests.exceptions.RequestException as e:
+        logging.warning(f"Error accessing host URL {hosturl}: {e}")
+        return {}  # Return an empty dictionary
 
 
 def HWRF_download(hwrfurl):
