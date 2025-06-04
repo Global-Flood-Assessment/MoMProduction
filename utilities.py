@@ -82,10 +82,11 @@ def get_latestitems(afolder, numofitems=7):
 
 def url_exits(aurl):
     """test if a url exists"""
-    req = requests.get(aurl)
-    if req.status_code == 200:
-        return True
-    else:
+    try:
+        req = requests.get(aurl, timeout=10)  # Add timeout to prevent hanging
+        return req.status_code == 200
+    except requests.exceptions.RequestException:
+        # Catches all requests-related exceptions (ConnectionError, Timeout, etc.)
         return False
 
 
