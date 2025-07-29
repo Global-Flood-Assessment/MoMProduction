@@ -1,11 +1,11 @@
 """
-    monitor.py
-        -- a simple monitor service
+monitor.py
+    -- a simple monitor service
 
-    notes on email:
-        -- https://sendgrid.com/ free account
-        -- https://github.com/sendgrid/sendgrid-python/
-            pip install sendgrid
+notes on email:
+    -- https://sendgrid.com/ free account
+    -- https://github.com/sendgrid/sendgrid-python/
+        pip install sendgrid
 """
 
 import configparser
@@ -195,6 +195,43 @@ def sendEmailSMTP(statusreport, reportsubject):
     server.quit()
 
 
+def sendGmail(statusreport, reportsubject):
+    """send email with SMTP server"""
+
+    from_email = config["GMAIL"]["from_email"]
+    to_emails = config["GMAIL"]["to_emails"]
+
+    # send to multiple email address
+    if "," in to_emails:
+        to_emails = to_emails.split(",")
+
+    from email.message import EmailMessage
+
+    msg = EmailMessage()
+    msg["From"] = from_email
+    msg["To"] = to_emails
+    msg["Subject"] = reportsubject
+    msg.set_content("status report")
+    msg.add_alternative(statusreport, subtype="html")
+
+    import smtplib
+    import ssl
+
+    smtpServer = config["GMAIL"]["server"]
+    smtpPort = config["GMAIL"]["port"]
+    smtpPassword = config["GMAIL"]["password"]
+    # Create a secure SSL context
+    context = ssl.create_default_context()
+
+    try:
+        with smtplib.SMTP_SSL(smtpServer, smtpPort, context=context) as smtp_server:
+            smtp_server.login(from_email, smtpPassword)
+            smtp_server.sendmail(from_email, to_emails, msg.as_string())
+        print("Email sent successfully!")
+    except Exception as e:
+        print(f"Error sending email: {e}")
+
+
 def checkService():
     """check service status"""
     # get the date
@@ -248,7 +285,7 @@ def checkService():
 
     # print(status)
     msg = writeStatus(status, operation_status, disk_status)
-    # emailsubject
+    # email subject
     email_subject = "Operation: " + operation_status
     if status["checkDisk"]:
         email_subject += " | Disk: " + disk_status
@@ -259,6 +296,9 @@ def checkService():
 
     if config.has_section("SMTP"):
         sendEmailSMTP(msg, email_subject)
+
+    if config.has_section("GMAIL"):
+        sendGmail(msg, email_subject)
 
 
 def checkDisk():
